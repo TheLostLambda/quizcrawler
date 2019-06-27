@@ -1,0 +1,14 @@
+# This is an arbitrary title for the config
+title = "Borg (Brooks's Org Format)"
+
+# This is a list of all file extensions supported by this config
+exts = ["org"]
+
+# The Regex details for flashcard-style questions
+[flash]
+leader = "- "
+term = ".*"
+separator = " :: "
+definition = ".*"
+terminator = "\n"
+
