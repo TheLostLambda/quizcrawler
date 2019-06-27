@@ -18,3 +18,11 @@
       (mapcar (lambda (sub) (cl-ppcre:split (caddr def) (trim sub)))
 	      (cl-ppcre:all-matches-as-strings
 	        (apply #'concatenate 'string def) str)))))
+
+(defun quizletify (infile &optional (outfile nil))
+  (let* ((defs (definitions (read-file infile)))
+         (str (format nil "~:{~A	~A~%~}" defs)))
+    (if outfile
+        (with-open-file (o outfile :direction :output)
+          (write-string str o))
+        str)))
