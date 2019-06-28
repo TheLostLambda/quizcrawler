@@ -1,22 +1,6 @@
 use crate::crawler::util::*;
 use serde_derive::Deserialize;
 
-/// Flash Cards
-#[derive(Debug)]
-pub struct Flash {
-    term: String,
-    definition: String,
-}
-
-impl Flash {
-    pub fn new(t: &str, d: &str) -> Flash {
-        Flash {
-            term: t.to_owned(),
-            definition: d.to_owned(),
-        }
-    }
-}
-
 /// Generic Result for using `?`
 type BoxResult<T> = Result<T,Box<dyn std::error::Error>>;
 

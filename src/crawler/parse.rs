@@ -1,4 +1,5 @@
-use crate::crawler::data::{Flash, FlashConfig};
+use crate::crawler::data::FlashConfig;
+use crate::core::data::Flash;
 use regex::Regex;
 
 /// Parse flashcards from str

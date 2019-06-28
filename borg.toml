@@ -11,4 +11,4 @@ term = ".*"
 separator = " :: "
 definition = ".*"
 terminator = "\n"
-
+# "- (.*) :: ([^]*?)(?=\n\s*[-*]+)"
