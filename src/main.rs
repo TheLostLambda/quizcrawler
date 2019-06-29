@@ -16,6 +16,7 @@ fn main() {
     let mut flashcards = parse::flashcards(&parse_data, config.flash);
     let mut rng = thread_rng();
     let (mut correct, mut seen) = (0.0, 0.0);
+    println!("{} flashcards matched", flashcards.len());
     loop {
         let idx = rng.gen_range(0, &flashcards.len());
         let card = &mut flashcards[idx];

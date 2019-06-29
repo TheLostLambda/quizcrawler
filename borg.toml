@@ -5,10 +5,10 @@ title = "Borg (Brooks's Org Format)"
 exts = ["org"]
 
 # The Regex details for flashcard-style questions
+# "- (.*) :: ([\s\S]*?)(?=\n\s*[-*0-9]+)"
 [flash]
 leader = "- "
 term = ".*"
 separator = " :: "
-definition = ".*"
-terminator = "\n"
-# "- (.*) :: ([^]*?)(?=\n\s*[-*]+)"
+definition = "[\\s\\S]*?"
+terminator = "(?=\n\\s*[-*0-9]+)"

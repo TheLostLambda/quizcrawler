@@ -7,6 +7,6 @@ edition = "2018"
 [dependencies]
 rand = "*"
 toml = "*"
-regex = "*"
+onig = "*"
 serde = "*"
 serde_derive = "*"
