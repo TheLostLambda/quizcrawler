@@ -10,3 +10,4 @@ gamification of studying should further increase engagement and recall.
 * Better / smarter answer checking
 * Verify that all of the regex is resonable for borg
 * Clean up multi-line strings (get rid of whitespace after '\n')
+* Set up some unit tests
