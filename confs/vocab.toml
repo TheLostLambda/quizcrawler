@@ -1,0 +1,14 @@
+# This is an arbitrary title for the config
+title = "Vocabulary Quizzer"
+
+# This is a list of all file extensions supported by this config
+exts = ["org"]
+
+# The Regex details for flashcard-style questions
+# "- (.*) :: ([\s\S]*?)(?=\n\s*[-*]+)"
+[flash]
+leader = "- "
+term = ".*"
+separator = " :: "
+definition = "[\\s\\S]*?"
+terminator = "(?=\n\\s*[-*]+)"

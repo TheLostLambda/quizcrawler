@@ -1,5 +1,6 @@
 use crate::crawler::util::*;
 use serde_derive::Deserialize;
+use std::path::PathBuf;
 
 /// Generic Result for using `?`
 type BoxResult<T> = Result<T,Box<dyn std::error::Error>>;
@@ -13,7 +14,7 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn from_file(file_name: &str) -> BoxResult<Config> {
+    pub fn from_file(file_name: &PathBuf) -> BoxResult<Config> {
         let toml_str = read_file_as_string(file_name)?;
         Ok(toml::from_str(&toml_str)?)
     }

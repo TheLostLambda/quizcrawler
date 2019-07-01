@@ -2,9 +2,12 @@ use crate::core::logic;
 
 /// All types of questions implement this trait
 pub trait Question {
-    /// This should increment the times seen
-    fn ask(&mut self) -> &str;
-    /// If correct, increment the times correct
+    /// Ask the question
+    fn ask(&self) -> &str;
+    /// Peek at the correct answer
+    fn peek(&self) -> &str;
+    /// This should increment the times seen and if correct, increment the
+    /// times correct
     fn answer(&mut self, ans: &str) -> (bool, &str);
     /// Changes how strict equality comparison is
     fn set_comp_level(&mut self, cl: u8);
@@ -45,17 +48,19 @@ impl Flash {
 }
 
 impl Question for Flash {
-    fn ask(&mut self) -> &str {
-        self.seen += 1; // Maybe move this to answer?
+    fn ask(&self) -> &str {
         if self.inverted { &self.definition } else { &self.term }
     }
+    fn peek(&self) -> &str {
+        if self.inverted { &self.term } else { &self.definition }
+    }
     fn answer(&mut self, ans: &str) -> (bool, &str) {
-        let correct_ans = if self.inverted { &self.term } else { &self.definition };
-        let correct = logic::check_answer(ans, correct_ans, self.comp_level);
+        let correct = logic::check_answer(ans, self.peek(), self.comp_level);
+        self.seen += 1;
         if correct {
             self.correct += 1;
         }
-        (correct, correct_ans)
+        (correct, self.peek())
     }
     fn set_comp_level(&mut self, cl: u8) {
         self.comp_level = cl;
@@ -74,5 +79,11 @@ impl Question for Flash {
         if self.correct > self.seen {
             self.correct = self.seen;
         }
+    }
+}
+
+impl PartialEq for Flash {
+    fn eq(&self, other: &Self) -> bool {
+        self.term == other.term
     }
 }
