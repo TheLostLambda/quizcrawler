@@ -30,5 +30,5 @@ pub fn run() {
         }
     }
     games::mc_quiz(&flashcards);
-    //games::flash_quiz(&flashcards);
+    games::flash_quiz(&flashcards);
 }
