@@ -20,6 +20,28 @@ pub trait Question {
     }
 }
 
+// Just drafting ideas here
+pub struct Section {
+    title: &'static str, // Should I just make this a String?
+    questions: Vec<Box<dyn Question>>,
+    children: Vec<Box<Section>>,
+}
+// Is it possible to match an identical regex group a second time?
+// If so, I should write a regex that matches *'s followed by whitespace and
+// should continue until the same number of *'s are encountered again (sibling
+// section) or the end of the file is reached. I think I should be able to do
+// that with groups.
+
+// Two passes follow, first the body of the section is parsed into questions
+// (this may actually involve several subpasses, one for each question type)
+// then the body is scanned for children and the process repeats.
+
+// I need to find a way to not double scan the questions within the children —
+// unless this becomes desirable. Perhaps the children pass happens first and
+// those matches are snipped from the string before questions are scanned
+// for. It's also possible just to build a second, negated regex that matches
+// things that aren't children and scrapes questions from those.
+
 /// Flash Cards
 #[derive(Debug, Clone)]
 pub struct Flash {

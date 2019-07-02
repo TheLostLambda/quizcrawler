@@ -3,6 +3,7 @@ use termion::raw::IntoRawMode;
 use termion::event::Key;
 use termion::*;
 use std::io;
+use std::io::Write;
 
 /// This clears the screen and moves the cursor to (1,1)
 pub fn new_screen() {
@@ -15,12 +16,12 @@ pub fn backtrack(n: u16) {
 }
 
 pub fn get_valid_char(valid: &Vec<char>) -> char {
-    // Figure this out
-    //let hidden = cursor::HideCursor::from(io::stdout());
-    let _stdout = io::stdout().into_raw_mode().unwrap();
+    let mut stdout = io::stdout().into_raw_mode().unwrap();
+    write!(stdout, "{}", cursor::Hide);
+    stdout.flush().unwrap();
     for k in io::stdin().keys() {
         match k.unwrap() {
-            Key::Char('q') => panic!("This needs more grace"),
+            Key::Char('q') => graceful_death(&mut stdout),
             Key::Char(c) if valid.contains(&c) => return c,
             _ => continue,
         }
@@ -37,12 +38,21 @@ pub fn float_right(text: &str) {
 
 pub fn enter_pause() {
     println!("ENTER to continue...");
-    let _stdout = io::stdout().into_raw_mode().unwrap();
+    let mut stdout = io::stdout().into_raw_mode().unwrap();
+    write!(stdout, "{}", cursor::Hide);
+    stdout.flush().unwrap();
     for k in io::stdin().keys() {
         match k.unwrap() {
-            Key::Char('q') => panic!("This needs more grace"),
+            Key::Char('q') => graceful_death(&mut stdout),
             Key::Char('\n') => break,
             _ => continue,
         }
     }
+}
+
+pub fn graceful_death<W: Write>(term: &mut raw::RawTerminal<W>) {
+    write!(term, "{}", cursor::Show).unwrap();
+    term.flush().unwrap();
+    term.suspend_raw_mode().unwrap();
+    std::process::exit(0);
 }

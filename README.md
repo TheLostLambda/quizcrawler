@@ -13,3 +13,4 @@ gamification of studying should further increase engagement and recall.
 * Set up some unit tests
 * Comments and documentation
 * A nicer interface with colour and ansi terminal features
+* Should games.rs be in core? Seperate the game logic and display?
