@@ -9,7 +9,6 @@ pub fn check_answer(ans: &str, correct: &str, level: u8) -> bool {
         // Case-insensitive
         2 => ans.trim().to_lowercase() == correct.trim().to_lowercase(),
         // Catch-all
-        _ => false
+        _ => false,
     }
 }
-    

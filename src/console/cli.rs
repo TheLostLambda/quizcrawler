@@ -1,12 +1,15 @@
-use crate::crawler::data::Config;
-use crate::crawler::util::*;
-use crate::crawler::parse;
 use crate::console::games;
-use structopt::StructOpt;
+use crate::crawler::data::Config;
+use crate::crawler::parse;
+use crate::crawler::util::*;
 use std::path::PathBuf;
+use structopt::StructOpt;
 
 #[derive(StructOpt)]
-#[structopt(name = "Quizcrawler", about = "Automagically generate interactive quizzes from preexisting notes")]
+#[structopt(
+    name = "Quizcrawler",
+    about = "Automagically generate interactive quizzes from preexisting notes"
+)]
 struct QC {
     /// The file containing the notes to be scraped during quiz generation
     #[structopt(parse(from_os_str))]
@@ -16,14 +19,14 @@ struct QC {
     recipe: PathBuf,
     /// Reverses the terms and definitions when quizzing flashcards
     #[structopt(short = "f", long = "flipped")]
-    flipped: bool
+    flipped: bool,
 }
 
 pub fn run() {
     let args = QC::from_args();
     let parse_data = read_file_as_string(&args.notes).unwrap();
     let config = Config::from_file(&args.recipe).unwrap();
-    let mut flashcards = parse::flashcards(&parse_data, config.flash);
+    let mut flashcards = parse::flashcards(&parse_data, &config.flash);
     if args.flipped {
         for card in &mut flashcards {
             card.flip();

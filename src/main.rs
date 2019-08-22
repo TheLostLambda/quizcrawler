@@ -1,6 +1,6 @@
-mod crawler;
-mod core;
 mod console;
+mod core;
+mod crawler;
 
 use crate::console::cli;
 

@@ -1,13 +1,13 @@
-use termion::input::TermRead;
-use termion::raw::IntoRawMode;
-use termion::event::Key;
-use termion::*;
 use std::io;
 use std::io::Write;
+use termion::event::Key;
+use termion::input::TermRead;
+use termion::raw::IntoRawMode;
+use termion::*;
 
 /// This clears the screen and moves the cursor to (1,1)
 pub fn new_screen() {
-    print!("{}{}", clear::All, cursor::Goto(1,1));
+    print!("{}{}", clear::All, cursor::Goto(1, 1));
 }
 
 /// Deletes N lines from above the current position
@@ -15,7 +15,7 @@ pub fn backtrack(n: u16) {
     print!("{}\r{}", cursor::Up(n), clear::AfterCursor);
 }
 
-pub fn get_valid_char(valid: &Vec<char>) -> char {
+pub fn get_valid_char(valid: &[char]) -> char {
     let mut stdout = io::stdout().into_raw_mode().unwrap();
     write!(stdout, "{}", cursor::Hide).unwrap();
     stdout.flush().unwrap();
@@ -32,7 +32,7 @@ pub fn get_valid_char(valid: &Vec<char>) -> char {
 /// Floats text to be right-aligned
 // Make this less brittle
 pub fn float_right(text: &str) {
-    let (c,_) = terminal_size().unwrap();
+    let (c, _) = terminal_size().unwrap();
     print!("\r{}{}", cursor::Right(c - text.len() as u16), text);
 }
 

@@ -16,16 +16,16 @@ pub trait Question {
     fn times_correct(&self) -> u32;
     fn override_correct(&mut self);
     fn score(&self) -> f64 {
-        self.times_correct() as f64 / self.times_seen() as f64
+        f64::from(self.times_correct()) / f64::from(self.times_seen())
     }
 }
 
 // Just drafting ideas here
-pub struct Section {
-    title: &'static str, // Should I just make this a String?
-    questions: Vec<Box<dyn Question>>,
-    children: Vec<Box<Section>>,
-}
+// pub struct Section {
+//     title: &'static str, // Should I just make this a String?
+//     questions: Vec<Box<dyn Question>>,
+//     children: Vec<Box<Section>>,
+// }
 // Is it possible to match an identical regex group a second time?
 // If so, I should write a regex that matches *'s followed by whitespace and
 // should continue until the same number of *'s are encountered again (sibling
@@ -54,8 +54,8 @@ pub struct Flash {
 }
 
 impl Flash {
-    pub fn new(t: &str, d: &str) -> Flash {
-        Flash {
+    pub fn new(t: &str, d: &str) -> Self {
+        Self {
             term: t.to_owned(),
             definition: d.to_owned(),
             inverted: false,
@@ -71,10 +71,18 @@ impl Flash {
 
 impl Question for Flash {
     fn ask(&self) -> &str {
-        if self.inverted { &self.definition } else { &self.term }
+        if self.inverted {
+            &self.definition
+        } else {
+            &self.term
+        }
     }
     fn peek(&self) -> &str {
-        if self.inverted { &self.term } else { &self.definition }
+        if self.inverted {
+            &self.term
+        } else {
+            &self.definition
+        }
     }
     fn answer(&mut self, ans: &str) -> (bool, &str) {
         let correct = logic::check_answer(ans, self.peek(), self.comp_level);
