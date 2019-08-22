@@ -17,7 +17,7 @@ pub fn backtrack(n: u16) {
 
 pub fn get_valid_char(valid: &Vec<char>) -> char {
     let mut stdout = io::stdout().into_raw_mode().unwrap();
-    write!(stdout, "{}", cursor::Hide);
+    write!(stdout, "{}", cursor::Hide).unwrap();
     stdout.flush().unwrap();
     for k in io::stdin().keys() {
         match k.unwrap() {
@@ -39,7 +39,7 @@ pub fn float_right(text: &str) {
 pub fn enter_pause() {
     println!("ENTER to continue...");
     let mut stdout = io::stdout().into_raw_mode().unwrap();
-    write!(stdout, "{}", cursor::Hide);
+    write!(stdout, "{}", cursor::Hide).unwrap();
     stdout.flush().unwrap();
     for k in io::stdin().keys() {
         match k.unwrap() {
