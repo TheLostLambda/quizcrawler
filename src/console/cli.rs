@@ -1,8 +1,7 @@
 use crate::console::games;
 use crate::crawler::data::Config;
 use crate::crawler::parse;
-use crate::crawler::util::*;
-use std::path::PathBuf;
+use std::fs;
 use structopt::StructOpt;
 
 #[derive(StructOpt)]
@@ -12,11 +11,9 @@ use structopt::StructOpt;
 )]
 struct QC {
     /// The file containing the notes to be scraped during quiz generation
-    #[structopt(parse(from_os_str))]
-    notes: PathBuf,
+    notes: String,
     /// The TOML file containing the grammar used to parse the note file
-    #[structopt(parse(from_os_str))]
-    recipe: PathBuf,
+    recipe: String,
     /// Reverses the terms and definitions when quizzing flashcards
     #[structopt(short = "f", long = "flipped")]
     flipped: bool,
@@ -24,8 +21,8 @@ struct QC {
 
 pub fn run() {
     let args = QC::from_args();
-    let parse_data = read_file_as_string(&args.notes).unwrap();
-    let config = Config::from_file(&args.recipe).unwrap();
+    let parse_data = fs::read_to_string(&args.notes).unwrap();
+    let config = Config::new(&args.recipe).unwrap();
     let mut flashcards = parse::flashcards(&parse_data, &config.flash);
     if args.flipped {
         for card in &mut flashcards {

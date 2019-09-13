@@ -1,9 +1,6 @@
-use crate::crawler::util::*;
-use serde_derive::Deserialize;
-use std::path::PathBuf;
-
-/// Generic Result for using `?`
-type BoxResult<T> = Result<T, Box<dyn std::error::Error>>;
+use serde::Deserialize;
+use std::error::Error;
+use std::fs;
 
 /// This struct holds all of the configuration data that is parsed from the TOML
 #[derive(Debug, Deserialize)]
@@ -14,8 +11,8 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn from_file(file_name: &PathBuf) -> BoxResult<Self> {
-        let toml_str = read_file_as_string(file_name)?;
+    pub fn new(file_name: &str) -> Result<Self, Box<dyn Error>> {
+        let toml_str = fs::read_to_string(file_name)?;
         Ok(toml::from_str(&toml_str)?)
     }
 }
