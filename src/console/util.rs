@@ -36,18 +36,25 @@ pub fn float_right(text: &str) {
     print!("\r{}{}", cursor::Right(c - text.len() as u16), text);
 }
 
-pub fn enter_pause() {
-    println!("ENTER to continue...");
+pub fn override_prompt(wrong: bool) -> bool {
+    print!("ENTER to continue");
+    if wrong {
+        println!(", 'o' for manual override...");
+    } else {
+        println!("...")
+    }
     let mut stdout = io::stdout().into_raw_mode().unwrap();
     write!(stdout, "{}", cursor::Hide).unwrap();
     stdout.flush().unwrap();
     for k in io::stdin().keys() {
         match k.unwrap() {
             Key::Char('q') => graceful_death(&mut stdout),
-            Key::Char('\n') => break,
+            Key::Char('\n') => return false,
+            Key::Char('o') if wrong => return true,
             _ => continue,
         }
-    }
+    };
+    false // Shouldn't be here... Use break and loop?
 }
 
 pub fn graceful_death<W: Write>(term: &mut raw::RawTerminal<W>) {

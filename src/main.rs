@@ -5,5 +5,6 @@ mod crawler;
 use crate::console::cli;
 
 fn main() {
-    cli::run();
+    // I should defined a custom error type to bundle in more information.
+    cli::run().unwrap();
 }

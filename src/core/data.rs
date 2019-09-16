@@ -1,30 +1,11 @@
 use crate::core::logic;
 
-/// All types of questions implement this trait
-pub trait Question {
-    /// Ask the question
-    fn ask(&self) -> &str;
-    /// Peek at the correct answer
-    fn peek(&self) -> &str;
-    /// This should increment the times seen and if correct, increment the
-    /// times correct
-    fn answer(&mut self, ans: &str) -> (bool, &str);
-    /// Changes how strict equality comparison is
-    fn set_comp_level(&mut self, cl: u8);
-    fn get_comp_level(&self) -> u8;
-    fn times_seen(&self) -> u32;
-    fn times_correct(&self) -> u32;
-    fn override_correct(&mut self);
-    fn score(&self) -> f64 {
-        f64::from(self.times_correct()) / f64::from(self.times_seen())
-    }
-}
-
 // Just drafting ideas here
 // pub struct Section {
-//     title: &'static str, // Should I just make this a String?
-//     questions: Vec<Box<dyn Question>>,
-//     children: Vec<Box<Section>>,
+//     name: String,
+//     parent: Box<Option<Section>>, // Ditch Box for a regular ref here?
+//     children: Vec<Section>,
+//     questions: Vec<Question>,
 // }
 // Is it possible to match an identical regex group a second time?
 // If so, I should write a regex that matches *'s followed by whitespace and
@@ -42,9 +23,18 @@ pub trait Question {
 // for. It's also possible just to build a second, negated regex that matches
 // things that aren't children and scrapes questions from those.
 
+/// Question Enum
+#[derive(Debug, Clone)]
+pub enum Question {
+    Term(Term),
+    _List(),
+    _Bullet(),
+    _Equation(),
+}
+
 /// Flash Cards
 #[derive(Debug, Clone)]
-pub struct Flash {
+pub struct Term {
     term: String,
     definition: String,
     inverted: bool,
@@ -53,67 +43,113 @@ pub struct Flash {
     comp_level: u8,
 }
 
-impl Flash {
-    pub fn new(t: &str, d: &str) -> Self {
-        Self {
+impl Term {
+    pub fn new(t: &str, d: &str) -> Question {
+        Question::Term(Self {
             term: t.to_owned(),
             definition: d.to_owned(),
             inverted: false,
             seen: 0,
             correct: 0,
             comp_level: 1,
-        }
+        })
     }
     pub fn flip(&mut self) {
         self.inverted = !self.inverted;
     }
 }
 
-impl Question for Flash {
-    fn ask(&self) -> &str {
-        if self.inverted {
-            &self.definition
-        } else {
-            &self.term
+impl Question {
+    pub fn ask(&self) -> &str {
+        match self {
+            Question::Term(t) => {
+                if t.inverted {
+                    &t.definition
+                } else {
+                    &t.term
+                }
+            }
+            _ => "",
         }
     }
-    fn peek(&self) -> &str {
-        if self.inverted {
-            &self.term
-        } else {
-            &self.definition
+
+    pub fn peek(&self) -> &str {
+        match self {
+            Question::Term(t) => {
+                if t.inverted {
+                    &t.term
+                } else {
+                    &t.definition
+                }
+            }
+            _ => "",
         }
     }
-    fn answer(&mut self, ans: &str) -> (bool, &str) {
-        let correct = logic::check_answer(ans, self.peek(), self.comp_level);
-        self.seen += 1;
-        if correct {
-            self.correct += 1;
-        }
+
+    pub fn answer(&mut self, ans: &str) -> (bool, &str) {
+        let right_ans = self.peek().to_owned(); // FIXME: This feels unneeded
+        let correct = match self {
+            Question::Term(t) => {
+                let correct = logic::check_answer(ans, &right_ans, t.comp_level);
+                t.seen += 1;
+                if correct {
+                    t.correct += 1;
+                }
+                correct
+            }
+            _ => false,
+        };
         (correct, self.peek())
     }
-    fn set_comp_level(&mut self, cl: u8) {
-        self.comp_level = cl;
+
+    pub fn _set_comp_level(&mut self, cl: u8) {
+        match self {
+            Question::Term(t) => {
+                t.comp_level = cl;
+            }
+            _ => (),
+        }
     }
-    fn get_comp_level(&self) -> u8 {
-        self.comp_level
+
+    pub fn _get_comp_level(&self) -> u8 {
+        match self {
+            Question::Term(t) => t.comp_level,
+            _ => 0,
+        }
     }
-    fn times_seen(&self) -> u32 {
-        self.seen
+    // Replace this and times_correct with a single "mastery" value
+    pub fn _times_seen(&self) -> u32 {
+        match self {
+            Question::Term(t) => t.seen,
+            _ => 0,
+        }
     }
-    fn times_correct(&self) -> u32 {
-        self.correct
+
+    pub fn _times_correct(&self) -> u32 {
+        match self {
+            Question::Term(t) => t.correct,
+            _ => 0,
+        }
     }
-    fn override_correct(&mut self) {
-        self.correct += 1;
-        if self.correct > self.seen {
-            self.correct = self.seen;
+
+    pub fn override_correct(&mut self) {
+        match self {
+            Question::Term(t) => {
+                t.correct += 1;
+                if t.correct > t.seen {
+                    t.correct = t.seen;
+                }
+            }
+            _ => (),
         }
     }
 }
 
-impl PartialEq for Flash {
+impl PartialEq for Question {
     fn eq(&self, other: &Self) -> bool {
-        self.term == other.term
+        match (self, other) {
+            (Question::Term(s), Question::Term(o)) => s.term == o.term,
+            _ => false,
+        }
     }
 }
