@@ -1,12 +1,18 @@
 use crate::core::logic;
 
 // Just drafting ideas here
-// pub struct Section {
-//     name: String,
-//     parent: Box<Option<Section>>, // Ditch Box for a regular ref here?
-//     children: Vec<Section>,
-//     questions: Vec<Question>,
-// }
+pub struct Section {
+    name: String,
+    children: Vec<Section>,
+    questions: Vec<Question>,
+}
+
+impl Section {
+    // Gah, this is kinda pointless right now...
+    pub fn new(name: &str, children: Vec<Section>, questions: Vec<Question>) -> Section {
+        Section { name: name.to_owned(), children, questions }
+    }
+}
 // Is it possible to match an identical regex group a second time?
 // If so, I should write a regex that matches *'s followed by whitespace and
 // should continue until the same number of *'s are encountered again (sibling

@@ -1,5 +1,6 @@
 use super::data::Crawler;
 use crate::core::data::Question;
+use crate::core::data::Section;
 use crate::core::data::Term;
 use onig::Regex;
 
@@ -20,6 +21,21 @@ impl Crawler {
             .captures_iter(src)
             .map(|caps| Term::new(caps.at(1).unwrap(), caps.at(2).unwrap()))
             .collect()
+    }
+
+    /// Get section
+    // This needs to read from the config. This is testing
+    pub fn parse_sections(&self, src: &str) -> Vec<Section> {
+        let rules = r"(^\*+ )(.*)\s([\s\S]*?)((?=^\1)|\z)"; // Implement me
+        let re = Regex::new(rules).unwrap();
+            re.captures_iter(src)
+                .map(|caps| {
+                    let name = caps.at(2).unwrap();
+                    let children = self.parse_sections(caps.at(3).unwrap());
+                    let questions = self.parse_flashcards(src); // This isn't right, needs a sectionless string
+                    Section::new(name, children, questions)
+                })
+                .collect()
     }
 }
 
