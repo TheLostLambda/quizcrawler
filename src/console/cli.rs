@@ -1,5 +1,5 @@
-use crate::core::data::Question;
-use crate::core::games::*;
+// use crate::core::data::QuestionVariant;
+// use crate::core::games::*;
 use crate::crawler::data::Crawler;
 use std::error::Error;
 use std::fs;
@@ -31,18 +31,21 @@ pub fn run() -> Result<(), Box<dyn Error>> {
     let parse_data = fs::read_to_string(&args.notes)?;
     let parse_config = fs::read_to_string(&args.recipe)?;
     let crawler = Crawler::new(&parse_config)?;
-    let mut flashcards = crawler.parse_flashcards(&parse_data);
-    if args.flipped {
-        for card in &mut flashcards {
-            if let Question::Term(card) = card {
-                card.flip();
-            }
-        }
-    }
-    let game = MultipleChoice::new(MCConfig, &flashcards);
-    play_game(game);
-    // games::flash_quiz(&flashcards);
-    Ok(())
+    // let mut flashcards = crawler.parse_flashcards(&parse_data);
+    let sections = crawler.parse_sections(&parse_data);
+    println!("{:#?}", sections);
+    return Ok(());
+    // if args.flipped {
+    //     for card in &mut flashcards {
+    //         if let QuestionVariant::Term(card) = card.inner() {
+    //             card.flip();
+    //         }
+    //     }
+    // }
+    // let game = MultipleChoice::new(MCConfig, &flashcards);
+    // play_game(game);
+    // // games::flash_quiz(&flashcards);
+    // Ok(())
 }
 
 fn play_game(mut game: impl Game) {

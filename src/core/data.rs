@@ -1,6 +1,7 @@
 use crate::core::logic;
 
 // Just drafting ideas here
+#[derive(Debug)]
 pub struct Section {
     name: String,
     children: Vec<Section>,
@@ -9,8 +10,8 @@ pub struct Section {
 
 impl Section {
     // Gah, this is kinda pointless right now...
-    pub fn new(name: &str, children: Vec<Section>, questions: Vec<Question>) -> Section {
-        Section { name: name.to_owned(), children, questions }
+    pub fn new(name: String, children: Vec<Section>, questions: Vec<Question>) -> Section {
+        Section { name, children, questions }
     }
 }
 // Is it possible to match an identical regex group a second time?
@@ -29,12 +30,28 @@ impl Section {
 // for. It's also possible just to build a second, negated regex that matches
 // things that aren't children and scrapes questions from those.
 
+#[derive(Debug, Clone)]
+pub enum Strictness {
+    Exact,
+    Trimmed,
+    Caseless,
+}
+
+#[derive(Debug, Clone)]
+pub struct Question {
+    data: QuestionVariant,
+    comp_level: Strictness,
+    mastery: u8, // (0-5 or 0-10?)
+    seen: u32,
+    correct: u32,
+}
+
 /// Question Enum
 #[derive(Debug, Clone)]
-pub enum Question {
+pub enum QuestionVariant {
     Term(Term),
-    _List(),
-    _Bullet(),
+    List(List),
+    Bullet(Bullet),
     _Equation(),
 }
 
@@ -44,31 +61,75 @@ pub struct Term {
     term: String,
     definition: String,
     inverted: bool,
-    seen: u32,
-    correct: u32,
-    comp_level: u8,
+}
+
+// Not a fan of this section having children, but I'll allow it for now
+// Also, term? item? body? Pick one.
+#[derive(Debug, Clone)]
+pub struct List {
+    order: u32,
+    item: String,
+    details: Vec<String>,
+}
+
+#[derive(Debug, Clone)]
+pub struct Bullet {
+    body: String,
 }
 
 impl Term {
-    pub fn new(t: &str, d: &str) -> Question {
-        Question::Term(Self {
-            term: t.to_owned(),
-            definition: d.to_owned(),
-            inverted: false,
-            seen: 0,
-            correct: 0,
-            comp_level: 1,
-        })
+    pub fn new(term: String, definition: String) -> Question {
+        Question::new(
+            QuestionVariant::Term(Self {
+                term,
+                definition,
+                inverted: false,
+            })
+        )
     }
+    
     pub fn flip(&mut self) {
         self.inverted = !self.inverted;
     }
 }
 
+impl List {
+    // Slice of strings here? &[] not Vec?
+    pub fn new(order: u32, item: String, details: Vec<String>) -> Question {
+        Question::new(
+            QuestionVariant::List(Self {
+                order,
+                item,
+                details,
+            })
+        )
+    }
+}
+
+impl Bullet {
+    pub fn new(body: String) -> Question {
+        Question::new(
+            QuestionVariant::Bullet(Self {
+                body,
+            })
+        )
+    }
+}
+
 impl Question {
+    pub fn new(data: QuestionVariant) -> Question {
+        Question {
+            data,
+            comp_level: Strictness::Trimmed,
+            mastery: 0, // (0-5 or 0-10?)
+            seen: 0,
+            correct: 0,
+        }
+    }
+    
     pub fn ask(&self) -> &str {
-        match self {
-            Question::Term(t) => {
+        match &self.data {
+            QuestionVariant::Term(t) => {
                 if t.inverted {
                     &t.definition
                 } else {
@@ -80,8 +141,8 @@ impl Question {
     }
 
     pub fn peek(&self) -> &str {
-        match self {
-            Question::Term(t) => {
+        match &self.data {
+            QuestionVariant::Term(t) => {
                 if t.inverted {
                     &t.term
                 } else {
@@ -93,68 +154,48 @@ impl Question {
     }
 
     pub fn answer(&mut self, ans: &str) -> (bool, &str) {
-        let right_ans = self.peek().to_owned(); // FIXME: This feels unneeded
-        let correct = match self {
-            Question::Term(t) => {
-                let correct = logic::check_answer(ans, &right_ans, t.comp_level);
-                t.seen += 1;
-                if correct {
-                    t.correct += 1;
-                }
-                correct
-            }
-            _ => false,
-        };
+        let right_ans = self.peek().to_owned();
+        let correct = logic::check_answer(ans, &right_ans, &self.comp_level);
+        self.seen += 1;
+        if correct {
+            self.correct += 1;
+        }
         (correct, self.peek())
     }
 
-    pub fn _set_comp_level(&mut self, cl: u8) {
-        match self {
-            Question::Term(t) => {
-                t.comp_level = cl;
-            }
-            _ => (),
-        }
+    // I'm not a massive fan of this...
+    pub fn inner(&mut self) -> &QuestionVariant {
+        &self.data
+    }
+    
+    pub fn _set_comp_level(&mut self, cl: Strictness) {
+        self.comp_level = cl;
     }
 
-    pub fn _get_comp_level(&self) -> u8 {
-        match self {
-            Question::Term(t) => t.comp_level,
-            _ => 0,
-        }
+    pub fn _get_comp_level(&self) -> &Strictness {
+        &self.comp_level
     }
     // Replace this and times_correct with a single "mastery" value
     pub fn _times_seen(&self) -> u32 {
-        match self {
-            Question::Term(t) => t.seen,
-            _ => 0,
-        }
+        self.seen
     }
 
     pub fn _times_correct(&self) -> u32 {
-        match self {
-            Question::Term(t) => t.correct,
-            _ => 0,
-        }
+        self.correct
     }
 
     pub fn override_correct(&mut self) {
-        match self {
-            Question::Term(t) => {
-                t.correct += 1;
-                if t.correct > t.seen {
-                    t.correct = t.seen;
-                }
-            }
-            _ => (),
+        self.correct += 1;
+        if self.correct > self.seen {
+            self.correct = self.seen;
         }
     }
 }
 
 impl PartialEq for Question {
     fn eq(&self, other: &Self) -> bool {
-        match (self, other) {
-            (Question::Term(s), Question::Term(o)) => s.term == o.term,
+        match (&self.data, &other.data) {
+            (QuestionVariant::Term(s), QuestionVariant::Term(o)) => s.term == o.term,
             _ => false,
         }
     }

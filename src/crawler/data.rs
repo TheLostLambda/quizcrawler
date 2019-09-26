@@ -9,16 +9,43 @@ use std::error::Error;
 pub struct Crawler {
     pub title: String,
     pub exts: Vec<String>,
-    pub flash: FlashConfig,
+    pub section: Option<SectionConfig>,
+    pub term: Option<TermConfig>,
+    pub list: Option<ListConfig>,
+    pub bullet: Option<BulletConfig>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct SectionConfig {
+    pub marker: String,
+    pub name: String,
+    pub body: String,
 }
 
 /// This struct holds the regex components needed to extract flashcards
 #[derive(Debug, Deserialize)]
-pub struct FlashConfig {
+pub struct TermConfig {
     pub leader: String,
     pub term: String,
     pub separator: String,
     pub definition: String,
+    pub terminator: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct ListConfig {
+    pub leader: String,
+    pub numerals: String,
+    pub body: String,
+    pub sub_leader: String,
+    pub sub_terminator: String,
+    pub terminator: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct BulletConfig {
+    pub leader: String,
+    pub body: String,
     pub terminator: String,
 }
 

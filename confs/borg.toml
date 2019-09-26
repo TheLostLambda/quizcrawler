@@ -5,16 +5,35 @@ title = "Borg (Brooks's Org Format)"
 exts = ["org"]
 
 # Sections
-# (^\*+ )(.*)\s([\s\S]*?)((?=^\1)|\z)
-
-# Bullets
-# ^\s*- ([\s\S]*?)(?=^\s*-|\z)
+# "(^\*+ )(.*)\s([\s\S]*?)((?=^\1)|\z)"
+[section]
+marker = "*"
+name = ".*"
+body = "[\\s\\S]*?"
 
 # The Regex details for flashcard-style questions
-# "- (.*) :: ([\s\S]*?)(?=\n\s*[-*0-9]+)"
-[flash]
+# "- (.*) :: ([\s\S]*?)\s*(?=^\s*[-*0-9]+|\z)"
+[term]
 leader = "- "
 term = ".*"
 separator = " :: "
 definition = "[\\s\\S]*?"
-terminator = "(?=\n\\s*[-*0-9]+)"
+terminator = "\\s*(?=^\\s*[-*0-9]+|\\z)"
+
+# Ordered Lists
+# "([0-9]+)\) ([\s\S]*?)\s*(^\s*- [\s\S]*?)*\s*(?=^\s*[*0-9]+|\z)"
+# This could use a lot of work...
+[list]
+leader = "\\)"
+numerals = "[0-9]+"
+body = "[\\s\\S]*?"
+sub_leader = "^\\s*- "
+sub_terminator = "\\s*(?=^\\s*[-*0-9]+|\\z)"
+terminator = "\\s*(?=^\\s*[*0-9]+|\\z)"
+
+# Bullets
+# "- ([\s\S]*?)\s*(?=^\s*[-*0-9]+|\z)"
+[bullet]
+leader = "- "
+body = "[\\s\\S]*?"
+terminator = "\\s*(?=^\\s*[-*0-9]+|\\z)"

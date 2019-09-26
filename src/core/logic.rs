@@ -1,14 +1,14 @@
+use crate::core::data::Strictness;
+
 /// This will eventually take many different strictness values and determine if
 /// two strings are close enough to be considered the same.
-pub fn check_answer(ans: &str, correct: &str, level: u8) -> bool {
+pub fn check_answer(ans: &str, correct: &str, level: &Strictness) -> bool {
     match level {
         // An exact match is required
-        0 => ans == correct,
+        Strictness::Exact => ans == correct,
         // Allow trailing and leading whitespace
-        1 => ans.trim() == correct.trim(),
+        Strictness::Trimmed => ans.trim() == correct.trim(),
         // Case-insensitive
-        2 => ans.trim().to_lowercase() == correct.trim().to_lowercase(),
-        // Catch-all
-        _ => false,
+        Strictness::Caseless => ans.trim().to_lowercase() == correct.trim().to_lowercase(),
     }
 }

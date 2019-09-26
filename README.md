@@ -13,7 +13,6 @@ gamification of studying should further increase engagement and recall.
 * Verify that all of the regex is resonable for borg
 * Clean up multi-line strings (get rid of whitespace after '\n')
 * A nicer interface with colour and ansi terminal features
-* Should games.rs be in core? Seperate the game logic and display?
 * Use hashmaps for the flash cards?
 * More functional or OO style?
 * Error handling! No more unwrap! Move error handling to main.
