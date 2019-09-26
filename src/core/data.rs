@@ -1,7 +1,7 @@
 use crate::core::logic;
 
 // Just drafting ideas here
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Section {
     name: String,
     children: Vec<Section>,

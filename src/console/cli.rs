@@ -28,11 +28,10 @@ struct QC {
 pub fn run() -> Result<(), Box<dyn Error>> {
     let args = QC::from_args();
     // Change the ? to unwrap_or_else so I can include more detail
-    let parse_data = fs::read_to_string(&args.notes)?;
     let parse_config = fs::read_to_string(&args.recipe)?;
     let crawler = Crawler::new(&parse_config)?;
     // let mut flashcards = crawler.parse_flashcards(&parse_data);
-    let sections = crawler.parse_sections(&parse_data);
+    let sections = crawler.parse_file(&args.notes);
     println!("{:#?}", sections);
     return Ok(());
     // if args.flipped {

@@ -2,6 +2,8 @@ use super::data::Crawler;
 use super::util;
 use crate::core::data::*;
 use onig::Regex;
+use std::fs;
+use std::path::Path;
 
 impl Crawler {
     /// Parse flashcards from str
@@ -10,7 +12,7 @@ impl Crawler {
     // passing only the remainder of the string, the parsers can become
     // progressively more general.
     fn parse_terms(&self, src: &str) -> (String, Vec<Question>) {
-        let rules = &self.term.as_ref().unwrap();
+        let rules = self.term.as_ref().unwrap();
         let re_str = format!(
             "{}({}){}({}){}",
             rules.leader, rules.term, rules.separator, rules.definition, rules.terminator,
@@ -29,7 +31,7 @@ impl Crawler {
     }
 
     fn parse_lists(&self, src: &str) -> (String, Vec<Question>) {
-        let rules = &self.list.as_ref().unwrap();
+        let rules = self.list.as_ref().unwrap();
         let re_str = format!(
             "({}){} ({})\\s*({}{})*{}",
             rules.numerals,
@@ -67,7 +69,7 @@ impl Crawler {
     }
 
     fn parse_bullets(&self, src: &str) -> (String, Vec<Question>) {
-        let rules = &self.bullet.as_ref().unwrap();
+        let rules = self.bullet.as_ref().unwrap();
         let re_str = format!("{}({}){}", rules.leader, rules.body, rules.terminator,);
         // There is some duplication to fix here!
         let matches = Regex::new(&re_str).unwrap();
@@ -93,7 +95,7 @@ impl Crawler {
 
     /// Get section
     pub fn parse_sections(&self, src: &str) -> Vec<Section> {
-        let rules = &self.section.as_ref().unwrap();
+        let rules = self.section.as_ref().unwrap();
         let sect_re_str = format!(
             "(^\\{}+ )({})\\s({})((?=^\\1)|\\z)",
             rules.marker, rules.name, rules.body
@@ -112,5 +114,16 @@ impl Crawler {
                 Section::new(name.to_owned(), children, questions)
             })
             .collect()
+    }
+
+    // This feels a tad out of place
+    // Needs some testing too
+    pub fn parse_file(&self, filename: &str) -> Section {
+        let src = fs::read_to_string(filename).unwrap();
+        Section::new(
+            Path::new(filename).file_stem().unwrap().to_str().unwrap().to_owned(),
+            self.parse_sections(&src),
+            Vec::new()
+        )
     }
 }
