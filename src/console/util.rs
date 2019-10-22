@@ -53,7 +53,7 @@ pub fn override_prompt(wrong: bool) -> bool {
             Key::Char('o') if wrong => return true,
             _ => continue,
         }
-    };
+    }
     false // Shouldn't be here... Use break and loop?
 }
 

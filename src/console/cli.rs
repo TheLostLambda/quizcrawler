@@ -1,14 +1,15 @@
 // use crate::core::data::QuestionVariant;
 // use crate::core::games::*;
+use crate::console::util::*;
+use crate::core::data::Section;
+use crate::core::games::Game;
 use crate::crawler::data::Crawler;
+use std::char;
 use std::error::Error;
 use std::fs;
-use structopt::StructOpt;
-use crate::console::util::*;
-use crate::core::games::Game;
 use std::io;
+use structopt::StructOpt;
 use termion::*;
-use std::char;
 
 #[derive(StructOpt)]
 #[structopt(
@@ -47,6 +48,11 @@ pub fn run() -> Result<(), Box<dyn Error>> {
     // Ok(())
 }
 
+fn tree_nav(tree: Section) {
+    // Press i or ? for more info about the selected item?
+    let mut path = vec![tree.name()];
+}
+
 fn play_game(mut game: impl Game) {
     loop {
         // Clear the screen before the next question
@@ -61,7 +67,7 @@ fn play_game(mut game: impl Game) {
             Some(q) => q,
             None => break,
         };
-        
+
         println!("\n{}", question);
 
         println!();
@@ -88,7 +94,7 @@ fn play_game(mut game: impl Game) {
             io::stdin().read_line(&mut ans).unwrap();
             game.answer(&ans)
         };
-        
+
         let ans_string = format!(", the answer is: {}", correct_ans);
         // Clear the choices before showing the answer. Keep the definition
 

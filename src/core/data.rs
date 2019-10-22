@@ -4,14 +4,39 @@ use crate::core::logic;
 #[derive(Debug, Clone)]
 pub struct Section {
     name: String,
-    children: Vec<Section>,
     questions: Vec<Question>,
+    children: Vec<Section>,
 }
 
 impl Section {
     // Gah, this is kinda pointless right now...
     pub fn new(name: String, children: Vec<Section>, questions: Vec<Question>) -> Section {
-        Section { name, children, questions }
+        Section {
+            name,
+            children,
+            questions,
+        }
+    }
+    // So are these. If version 1.0 doesn't make these more meaningful, just
+    // make the struct fields public
+    pub fn name(&self) -> &str {
+        &self.name
+    }
+    pub fn children(&self) -> &Vec<Section> {
+        &self.children
+    }
+    // Write a test function for this!
+    pub fn child_at_path(&self, path: Vec<&str>) -> Option<&Section> {
+        let mut current = self;
+        for name in path {
+            // What happens when there are sections with the same name?
+            current = current
+                .children()
+                .iter()
+                .filter(|&c| c.name() == name)
+                .next()?;
+        }
+        Some(current)
     }
 }
 // Is it possible to match an identical regex group a second time?
@@ -79,15 +104,13 @@ pub struct Bullet {
 
 impl Term {
     pub fn new(term: String, definition: String) -> Question {
-        Question::new(
-            QuestionVariant::Term(Self {
-                term,
-                definition,
-                inverted: false,
-            })
-        )
+        Question::new(QuestionVariant::Term(Self {
+            term,
+            definition,
+            inverted: false,
+        }))
     }
-    
+
     pub fn flip(&mut self) {
         self.inverted = !self.inverted;
     }
@@ -96,23 +119,17 @@ impl Term {
 impl List {
     // Slice of strings here? &[] not Vec?
     pub fn new(order: u32, item: String, details: Vec<String>) -> Question {
-        Question::new(
-            QuestionVariant::List(Self {
-                order,
-                item,
-                details,
-            })
-        )
+        Question::new(QuestionVariant::List(Self {
+            order,
+            item,
+            details,
+        }))
     }
 }
 
 impl Bullet {
     pub fn new(body: String) -> Question {
-        Question::new(
-            QuestionVariant::Bullet(Self {
-                body,
-            })
-        )
+        Question::new(QuestionVariant::Bullet(Self { body }))
     }
 }
 
@@ -126,7 +143,7 @@ impl Question {
             correct: 0,
         }
     }
-    
+
     pub fn ask(&self) -> &str {
         match &self.data {
             QuestionVariant::Term(t) => {
@@ -167,7 +184,7 @@ impl Question {
     pub fn inner(&mut self) -> &QuestionVariant {
         &self.data
     }
-    
+
     pub fn _set_comp_level(&mut self, cl: Strictness) {
         self.comp_level = cl;
     }

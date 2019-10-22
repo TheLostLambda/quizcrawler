@@ -117,13 +117,18 @@ impl Crawler {
     }
 
     // This feels a tad out of place
-    // Needs some testing too
+    // FIXME: Needs some testing too
     pub fn parse_file(&self, filename: &str) -> Section {
         let src = fs::read_to_string(filename).unwrap();
         Section::new(
-            Path::new(filename).file_stem().unwrap().to_str().unwrap().to_owned(),
+            Path::new(filename)
+                .file_name()
+                .unwrap()
+                .to_str()
+                .unwrap()
+                .to_owned(),
             self.parse_sections(&src),
-            Vec::new()
+            Vec::new(),
         )
     }
 }

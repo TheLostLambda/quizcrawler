@@ -28,7 +28,7 @@ pub struct MultipleChoice {
     seen: i32,
     idx: usize,
     questions: Vec<Question>,
-    choices: Option<Vec<usize>>,
+    choices: Vec<usize>,
 }
 
 pub struct Flashcards {
@@ -47,10 +47,10 @@ impl MultipleChoice {
     }
 
     fn choices(&self) -> Vec<&Question> {
-        match &self.choices {
-            Some(idxs) => idxs.iter().map(|&idx| &self.questions[idx]).collect(),
-            None => Vec::new(),
-        }
+        self.choices
+            .iter()
+            .map(|&idx| &self.questions[idx])
+            .collect()
     }
 }
 
@@ -72,7 +72,7 @@ impl Game for MultipleChoice {
             seen: 0,
             idx: 0,
             questions,
-            choices: None,
+            choices: Vec::new(),
         }
     }
 
@@ -94,7 +94,7 @@ impl Game for MultipleChoice {
             .choose_multiple(&mut rng, 3); // The config should determine the number of choices here
         choices.push(self.idx);
         choices.shuffle(&mut self.rng);
-        self.choices = Some(choices);
+        self.choices = choices;
         Some(self.current().ask())
     }
 
@@ -103,7 +103,19 @@ impl Game for MultipleChoice {
     }
 
     fn get_hint(&mut self) -> Vec<&str> {
-        unimplemented!();
+        let mut rng = self.rng;
+        let n = self.choices.len();
+        // Cheap clone... Find a better way...
+        let mut choices = self
+            .choices
+            .clone()
+            .into_iter()
+            .filter(|&c| c != self.idx)
+            .choose_multiple(&mut rng, n - 2);
+        choices.push(self.idx);
+        choices.shuffle(&mut rng);
+        self.choices = choices;
+        self.get_choices()
     }
 
     fn answer(&mut self, ans: &str) -> (bool, String) {

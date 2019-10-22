@@ -8,7 +8,8 @@ fn crawler() -> Crawler {
     Crawler::new(&conf_str).unwrap_or_else(|err| {
         panic!(
             "Failed to parse a config from string. The error was: {}\n The config string was: {}",
-            err, conf_str);
+            err, conf_str
+        );
     })
 }
 
