@@ -5,13 +5,13 @@ use crate::core::data::Section;
 use crate::core::games::Game;
 use crate::crawler::data::Crawler;
 use std::char;
+use std::collections::HashMap;
 use std::error::Error;
 use std::fs;
 use std::io;
 use structopt::StructOpt;
-use termion::*;
 use termion::event::Key; // Do I really want this here?
-use std::collections::HashMap;
+use termion::*;
 
 #[derive(StructOpt)]
 #[structopt(
@@ -62,14 +62,15 @@ fn tree_nav(tree: Section) {
 
         print!("{} > ", tree.name());
         for node in &path {
-            print!("{} > ", node );
+            print!("{} > ", node);
         }
         println!("\n");
 
         let selected = sel_hist.entry(path.clone()).or_insert(0);
         // ^ I think that the clone here is okay
 
-        for (id, child) in children.clone().enumerate() { // Not a fan of the clone here...
+        for (id, child) in children.clone().enumerate() {
+            // Not a fan of the clone here...
             if id == *selected {
                 print!("*")
             } else {
@@ -83,7 +84,9 @@ fn tree_nav(tree: Section) {
             Key::Up if parent && *selected > 0 => *selected -= 1,
             Key::Down if parent && *selected < children.len() - 1 => *selected += 1,
             Key::Right if parent => path.push(children.nth(*selected).unwrap()),
-            Key::Left => { path.pop(); },
+            Key::Left => {
+                path.pop();
+            }
             _ => (),
         };
 

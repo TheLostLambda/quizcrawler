@@ -27,7 +27,7 @@ fn find_child_at_path() {
 *** Subtopic A
   - Well done!
 "#;
-    
+
     let pretty_result = r#"Some(
     Section {
         name: "Subtopic A",
