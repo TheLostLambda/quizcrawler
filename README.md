@@ -7,7 +7,7 @@ leverages spaced repetition and forced / active recall to enhance learning. The
 gamification of studying should further increase engagement and recall.
 
 ## What am I doing now?
-  1. Writing a test for the `child_at_path()` method
+  1. Allow quizzes to be started from the tree menu
 
 ## Progress
 ### v1.0.0
@@ -36,9 +36,9 @@ gamification of studying should further increase engagement and recall.
       - [ ] Go up another level is parent / siblings are too small
   - [1/3] Subject organisation
     - [x] Parse into a tree data structure (files are top level)
-    - [ ] Allow for menu based exploration of the tree
-      - [ ] Show actual tree preview
-      - [ ] Easy keyboard navigation (no return needed)
+    - [x] Allow for menu based exploration of the tree
+      - [x] Show actual tree preview
+      - [x] Easy keyboard navigation (no return needed)
     - [ ] Allow certain subjects to be bookmarked
       - [ ] Stars out of 5
   - [0/5] Persistence & Metadata

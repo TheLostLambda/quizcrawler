@@ -72,7 +72,7 @@ fn tree_nav(tree: Section) {
         for (id, child) in children.clone().enumerate() {
             // Not a fan of the clone here...
             if id == *selected {
-                print!("*")
+                print!(">")
             } else {
                 print!(" ");
             }
