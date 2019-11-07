@@ -10,6 +10,8 @@ use std::fs;
 use std::io;
 use structopt::StructOpt;
 use termion::*;
+use termion::event::Key; // Do I really want this here?
+use std::collections::HashMap;
 
 #[derive(StructOpt)]
 #[structopt(
@@ -32,8 +34,9 @@ pub fn run() -> Result<(), Box<dyn Error>> {
     let parse_config = fs::read_to_string(&args.recipe)?;
     let crawler = Crawler::new(&parse_config)?;
     // let mut flashcards = crawler.parse_flashcards(&parse_data);
-    let sections = crawler.parse_file(&args.notes);
-    println!("{:#?}", sections);
+    let section = crawler.parse_file(&args.notes);
+    // println!("{:#?}", sections);
+    tree_nav(section);
     return Ok(());
     // if args.flipped {
     //     for card in &mut flashcards {
@@ -50,7 +53,43 @@ pub fn run() -> Result<(), Box<dyn Error>> {
 
 fn tree_nav(tree: Section) {
     // Press i or ? for more info about the selected item?
-    let mut path = vec![tree.name()];
+    let mut path = Vec::new();
+    let mut sel_hist = HashMap::new();
+    loop {
+        let node = tree.child_at_path(&path).unwrap();
+        let mut children = node.children().iter().map(|x| x.name());
+        new_screen();
+
+        print!("{} > ", tree.name());
+        for node in &path {
+            print!("{} > ", node );
+        }
+        println!("\n");
+
+        let selected = sel_hist.entry(path.clone()).or_insert(0);
+        // ^ I think that the clone here is okay
+
+        for (id, child) in children.clone().enumerate() { // Not a fan of the clone here...
+            if id == *selected {
+                print!("*")
+            } else {
+                print!(" ");
+            }
+            println!(" {}", child);
+        }
+
+        let parent = children.len() > 0;
+        match get_valid_key(&[Key::Up, Key::Down, Key::Right, Key::Left]) {
+            Key::Up if parent && *selected > 0 => *selected -= 1,
+            Key::Down if parent && *selected < children.len() - 1 => *selected += 1,
+            Key::Right if parent => path.push(children.nth(*selected).unwrap()),
+            Key::Left => { path.pop(); },
+            _ => (),
+        };
+
+        // println!("{:#?}", children);
+        // override_prompt(false);
+    }
 }
 
 fn play_game(mut game: impl Game) {

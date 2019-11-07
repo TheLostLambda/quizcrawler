@@ -26,14 +26,14 @@ impl Section {
         &self.children
     }
     // Write a test function for this!
-    pub fn child_at_path(&self, path: Vec<&str>) -> Option<&Section> {
+    pub fn child_at_path(&self, path: &[&str]) -> Option<&Section> {
         let mut current = self;
         for name in path {
             // What happens when there are sections with the same name?
             current = current
                 .children()
                 .iter()
-                .filter(|&c| c.name() == name)
+                .filter(|c| &c.name() == name)
                 .next()?;
         }
         Some(current)

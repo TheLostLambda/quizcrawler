@@ -16,17 +16,26 @@ pub fn backtrack(n: u16) {
 }
 
 pub fn get_valid_char(valid: &[char]) -> char {
+    let keys: Vec<_> = valid.iter().map(|&c| Key::Char(c)).collect();
+    if let Key::Char(chr) = get_valid_key(&keys[..]) {
+        chr
+    } else {
+        ' ' // Just appeasing the type-checker...
+    }
+}
+
+pub fn get_valid_key(valid: &[Key]) -> Key {
     let mut stdout = io::stdout().into_raw_mode().unwrap();
     write!(stdout, "{}", cursor::Hide).unwrap();
     stdout.flush().unwrap();
     for k in io::stdin().keys() {
         match k.unwrap() {
             Key::Char('q') => graceful_death(&mut stdout),
-            Key::Char(c) if valid.contains(&c) => return c,
+            k if valid.contains(&k) => return k,
             _ => continue,
         }
     }
-    ' ' // This shouldn't need to be here
+    Key::Null // This shouldn't need to be here
 }
 
 /// Floats text to be right-aligned

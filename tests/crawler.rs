@@ -24,7 +24,6 @@ fn test_parse_terms() {
     let pretty_result = r#"[
     Section {
         name: "Terms",
-        children: [],
         questions: [
             Question {
                 data: Term(
@@ -66,6 +65,7 @@ fn test_parse_terms() {
                 correct: 0,
             },
         ],
+        children: [],
     },
 ]"#;
 
@@ -87,7 +87,6 @@ fn test_parse_lists() {
     let pretty_result = r#"[
     Section {
         name: "Terms",
-        children: [],
         questions: [
             Question {
                 data: List(
@@ -131,6 +130,7 @@ fn test_parse_lists() {
                 correct: 0,
             },
         ],
+        children: [],
     },
 ]"#;
 
@@ -151,7 +151,6 @@ fn test_parse_bullets() {
     let pretty_result = r#"[
     Section {
         name: "Terms",
-        children: [],
         questions: [
             Question {
                 data: Bullet(
@@ -187,6 +186,7 @@ fn test_parse_bullets() {
                 correct: 0,
             },
         ],
+        children: [],
     },
 ]"#;
 
@@ -210,7 +210,6 @@ fn test_parse_multiline_terms() {
     let pretty_result = r#"[
     Section {
         name: "Terms",
-        children: [],
         questions: [
             Question {
                 data: Term(
@@ -226,6 +225,7 @@ fn test_parse_multiline_terms() {
                 correct: 0,
             },
         ],
+        children: [],
     },
 ]"#;
 
