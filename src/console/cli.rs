@@ -1,8 +1,8 @@
 // use crate::core::data::QuestionVariant;
-// use crate::core::games::*;
 use crate::console::util::*;
 use crate::core::data::Section;
 use crate::core::games::Game;
+use crate::core::games::*;
 use crate::crawler::data::Crawler;
 use std::char;
 use std::collections::HashMap;
@@ -55,8 +55,11 @@ fn tree_nav(tree: Section) {
     // Press i or ? for more info about the selected item?
     let mut path = Vec::new();
     let mut sel_hist = HashMap::new();
-    loop {
+    let section = loop {
         let node = tree.child_at_path(&path).unwrap();
+        if !node.is_parent() {
+            break node;
+        }
         let mut children = node.children().iter().map(|x| x.name());
         new_screen();
 
@@ -79,20 +82,17 @@ fn tree_nav(tree: Section) {
             println!(" {}", child);
         }
 
-        let parent = children.len() > 0;
         match get_valid_key(&[Key::Up, Key::Down, Key::Right, Key::Left]) {
-            Key::Up if parent && *selected > 0 => *selected -= 1,
-            Key::Down if parent && *selected < children.len() - 1 => *selected += 1,
-            Key::Right if parent => path.push(children.nth(*selected).unwrap()),
+            Key::Up if node.is_parent() && *selected > 0 => *selected -= 1,
+            Key::Down if node.is_parent() && *selected < children.len() - 1 => *selected += 1,
+            Key::Right if node.is_parent() => path.push(children.nth(*selected).unwrap()),
             Key::Left => {
                 path.pop();
             }
             _ => (),
         };
-
-        // println!("{:#?}", children);
-        // override_prompt(false);
-    }
+    };
+    play_game(MultipleChoice::new(MCConfig, section.questions()));
 }
 
 fn play_game(mut game: impl Game) {

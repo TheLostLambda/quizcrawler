@@ -173,7 +173,7 @@ impl Game for Flashcards {
     }
 
     fn get_hint(&mut self) -> Vec<&str> {
-        unimplemented!()
+        todo!()
     }
 
     fn answer(&mut self, ans: &str) -> (bool, String) {

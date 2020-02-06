@@ -7,22 +7,23 @@ leverages spaced repetition and forced / active recall to enhance learning. The
 gamification of studying should further increase engagement and recall.
 
 ## What am I doing now?
-  1. Allow quizzes to be started from the tree menu
+  1. Add section summary in tree-view (how many questions and of what type?)
+  2. Fix MC (Similarity + Diminishing Options)
 
 ## Progress
 ### v1.0.0
-  - [3/4] Support multiple question types
+  - [ ] Support multiple question types
     - [x] Flashcard-style
     - [x] Proof / Process / ordered list
     - [x] Topical Details / unordered list
     - [ ] Crude formula questions (label vars)
-  - [0/5] Quiz Types
-    - [-] Typed answer
+  - [ ] Quiz Types
+    - [ ] Typed answer
       - [ ] Configurable strictness (case-sensitive, etc)
       - [x] "I was right" option
     - [ ] Fill in the blanks
       - [ ] Focus cutting out keywords
-    - [-] Multiple choice
+    - [ ] Multiple choice
       - [x] Basic support
       - [ ] Hint / eliminate some answers
       - [ ] Detect and present similar answers
@@ -34,14 +35,14 @@ gamification of studying should further increase engagement and recall.
       - [ ] Brings up parent / siblings with context of the question
       - [ ] Gives the notes with answer inside, but you need to find it
       - [ ] Go up another level is parent / siblings are too small
-  - [1/3] Subject organisation
+  - [ ] Subject organisation
     - [x] Parse into a tree data structure (files are top level)
     - [x] Allow for menu based exploration of the tree
       - [x] Show actual tree preview
       - [x] Easy keyboard navigation (no return needed)
     - [ ] Allow certain subjects to be bookmarked
       - [ ] Stars out of 5
-  - [0/5] Persistence & Metadata
+  - [ ] Persistence & Metadata
     - [ ] Save tree data / metadata
       - [ ] TOML File
     - [ ] Record / save quiz progress
@@ -52,7 +53,7 @@ gamification of studying should further increase engagement and recall.
     - [ ] Store which types of question each bit of info best fits with
       - [ ] Quiz type preference
       - [ ] Strictness preference
-  - [0/5] Interface
+  - [ ] Interface
     - [ ] Main screen
       - [ ] List of quizzes due for review (spaced reps)
         - [ ] Based on last time seen & mastery
@@ -63,8 +64,8 @@ gamification of studying should further increase engagement and recall.
     - [ ] Quiz tweaker: Allows for viewing & setting
     - [ ] When asking a question display the tree path for context
     - [ ] More colour coding / fancy terminal witchcraft
-      - [ ] Clear screen
-      - [ ] No return
+      - [x] Clear screen
+      - [x] No return
       - [ ] Colour by mastery
       - [ ] Colour by right / wrong
       - [ ] Colour answers diffs

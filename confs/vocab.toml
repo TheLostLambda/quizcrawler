@@ -4,9 +4,16 @@ title = "Vocabulary Quizzer"
 # This is a list of all file extensions supported by this config
 exts = ["org"]
 
-# The Regex details for flashcard-style questions
+# Sections
+# "(^\*+ )(.*)\s([\s\S]*?)((?=^\1)|\z)"
+[section]
+marker = "*"
+name = ".*"
+body = "[\\s\\S]*?"
+
+# The Regex details for definition-style questions
 # "- (.*) :: ([\s\S]*?)(?=\n\s*[-*]+)"
-[flash]
+[term]
 leader = "- "
 term = ".*"
 separator = " :: "

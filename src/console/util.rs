@@ -46,7 +46,7 @@ pub fn float_right(text: &str) {
 }
 
 pub fn override_prompt(wrong: bool) -> bool {
-    print!("ENTER to continue");
+    print!("ENTER or SPACE to continue");
     if wrong {
         println!(", 'o' for manual override...");
     } else {
@@ -58,7 +58,7 @@ pub fn override_prompt(wrong: bool) -> bool {
     for k in io::stdin().keys() {
         match k.unwrap() {
             Key::Char('q') => graceful_death(&mut stdout),
-            Key::Char('\n') => return false,
+            Key::Char('\n') | Key::Char(' ') => return false,
             Key::Char('o') if wrong => return true,
             _ => continue,
         }

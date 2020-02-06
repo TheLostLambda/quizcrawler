@@ -25,6 +25,12 @@ impl Section {
     pub fn children(&self) -> &Vec<Section> {
         &self.children
     }
+    pub fn is_parent(&self) -> bool {
+        self.children().len() > 0
+    }
+    pub fn questions(&self) -> &Vec<Question> {
+        &self.questions
+    }
     // Write a test function for this!
     pub fn child_at_path(&self, path: &[&str]) -> Option<&Section> {
         let mut current = self;
