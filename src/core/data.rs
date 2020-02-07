@@ -1,15 +1,15 @@
 use crate::core::logic;
 
-// Just drafting ideas here
+// I really don't know how I feel about these public fields...
 #[derive(Debug, Clone)]
 pub struct Section {
-    name: String,
-    questions: Vec<Question>,
-    children: Vec<Section>,
+    pub name: String,
+    pub questions: Vec<Question>,
+    pub children: Vec<Section>,
 }
 
 impl Section {
-    // Gah, this is kinda pointless right now...
+    // Not sure if I should keep this around...
     pub fn new(name: String, children: Vec<Section>, questions: Vec<Question>) -> Section {
         Section {
             name,
@@ -17,49 +17,24 @@ impl Section {
             questions,
         }
     }
-    // So are these. If version 1.0 doesn't make these more meaningful, just
-    // make the struct fields public
-    pub fn name(&self) -> &str {
-        &self.name
-    }
-    pub fn children(&self) -> &Vec<Section> {
-        &self.children
-    }
+    
     pub fn is_parent(&self) -> bool {
-        self.children().len() > 0
+        !self.children.is_empty()
     }
-    pub fn questions(&self) -> &Vec<Question> {
-        &self.questions
-    }
+
     // Write a test function for this!
     pub fn child_at_path(&self, path: &[&str]) -> Option<&Section> {
         let mut current = self;
         for name in path {
             // What happens when there are sections with the same name?
             current = current
-                .children()
+                .children
                 .iter()
-                .filter(|c| &c.name() == name)
-                .next()?;
+                .find(|c| &c.name == name)?;
         }
         Some(current)
     }
 }
-// Is it possible to match an identical regex group a second time?
-// If so, I should write a regex that matches *'s followed by whitespace and
-// should continue until the same number of *'s are encountered again (sibling
-// section) or the end of the file is reached. I think I should be able to do
-// that with groups.
-
-// Two passes follow, first the body of the section is parsed into questions
-// (this may actually involve several subpasses, one for each question type)
-// then the body is scanned for children and the process repeats.
-
-// I need to find a way to not double scan the questions within the children —
-// unless this becomes desirable. Perhaps the children pass happens first and
-// those matches are snipped from the string before questions are scanned
-// for. It's also possible just to build a second, negated regex that matches
-// things that aren't children and scrapes questions from those.
 
 #[derive(Debug, Clone)]
 pub enum Strictness {
@@ -187,8 +162,8 @@ impl Question {
     }
 
     // I'm not a massive fan of this...
-    pub fn inner(&mut self) -> &QuestionVariant {
-        &self.data
+    pub fn inner(&mut self) -> &mut QuestionVariant {
+        &mut self.data
     }
 
     pub fn _set_comp_level(&mut self, cl: Strictness) {

@@ -11,7 +11,7 @@ use std::fs;
 use std::io;
 use structopt::StructOpt;
 use termion::event::Key; // Do I really want this here?
-use termion::*;
+use termion::*; // PURGE ME
 
 #[derive(StructOpt)]
 #[structopt(
@@ -30,49 +30,37 @@ struct QC {
 
 pub fn run() -> Result<(), Box<dyn Error>> {
     let args = QC::from_args();
-    // Change the ? to unwrap_or_else so I can include more detail
     let parse_config = fs::read_to_string(&args.recipe)?;
     let crawler = Crawler::new(&parse_config)?;
-    // let mut flashcards = crawler.parse_flashcards(&parse_data);
-    let section = crawler.parse_file(&args.notes);
-    // println!("{:#?}", sections);
-    tree_nav(section);
-    return Ok(());
-    // if args.flipped {
-    //     for card in &mut flashcards {
-    //         if let QuestionVariant::Term(card) = card.inner() {
-    //             card.flip();
-    //         }
-    //     }
-    // }
-    // let game = MultipleChoice::new(MCConfig, &flashcards);
-    // play_game(game);
-    // // games::flash_quiz(&flashcards);
-    // Ok(())
-}
-
-fn tree_nav(tree: Section) {
+    let tree = crawler.parse_file(&args.notes);
     // Press i or ? for more info about the selected item?
     let mut path = Vec::new();
     let mut sel_hist = HashMap::new();
-    let section = loop {
+    loop {
         let node = tree.child_at_path(&path).unwrap();
         if !node.is_parent() {
-            break node;
+            play_game(MultipleChoice::new(MCConfig::new().flipped(args.flipped), &node.questions));
+            path.pop();
+            continue;
         }
-        let mut children = node.children().iter().map(|x| x.name());
+        let children: Vec<_> = node.children.iter().map(|x| &x.name).collect();
         new_screen();
 
-        print!("{} > ", tree.name());
+        print!("{} > ", tree.name);
         for node in &path {
             print!("{} > ", node);
         }
-        println!("\n");
 
         let selected = sel_hist.entry(path.clone()).or_insert(0);
         // ^ I think that the clone here is okay
+        
+        // Show more and make this nicer
+        let selected_node = node.child_at_path(&[children[*selected]]).unwrap();
+        float_right(&format!("{} Children, {} Questions", selected_node.children.len(), selected_node.questions.len()));
+        
+        println!("\n");
 
-        for (id, child) in children.clone().enumerate() {
+        for (id, child) in children.iter().enumerate() {
             // Not a fan of the clone here...
             if id == *selected {
                 print!(">")
@@ -85,14 +73,14 @@ fn tree_nav(tree: Section) {
         match get_valid_key(&[Key::Up, Key::Down, Key::Right, Key::Left]) {
             Key::Up if node.is_parent() && *selected > 0 => *selected -= 1,
             Key::Down if node.is_parent() && *selected < children.len() - 1 => *selected += 1,
-            Key::Right if node.is_parent() => path.push(children.nth(*selected).unwrap()),
+            Key::Right if node.is_parent() => path.push(&children[*selected]),
             Key::Left => {
                 path.pop();
             }
-            _ => (),
+            _ => graceful_death(),
         };
-    };
-    play_game(MultipleChoice::new(MCConfig, section.questions()));
+    }; 
+    Ok(())
 }
 
 fn play_game(mut game: impl Game) {
@@ -115,7 +103,7 @@ fn play_game(mut game: impl Game) {
         println!();
 
         let choices = game.get_choices();
-        let (result, correct_ans) = if choices.len() > 0 {
+        let (result, correct_ans) = if !choices.is_empty() {
             let id_shift: u8 = 49;
             let mut valid = Vec::new();
             for (i, opt) in choices.iter().enumerate() {
@@ -127,7 +115,11 @@ fn play_game(mut game: impl Game) {
             println!();
 
             // The char to digit thing here is hacky
-            let choice_idx = get_valid_char(&valid) as u8 - id_shift;
+            let choice_idx = if let Some(chr) = get_valid_char(&valid) {
+                chr as u8 - id_shift
+            } else {
+                return;
+            };
             // char::from(u8)
             backtrack(choices.len() as u16 + 1);
             game.answer(&choice_idx.to_string())

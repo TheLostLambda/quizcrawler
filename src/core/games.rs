@@ -1,4 +1,4 @@
-use crate::core::data::Question;
+use crate::core::data::{Question, QuestionVariant};
 use rand::prelude::*;
 use rand::seq::IteratorRandom;
 
@@ -17,11 +17,25 @@ pub trait Game {
 
 // Use macros to implement the duplicate methods
 
-pub struct MCConfig;
+pub struct MCConfig {
+    flipped: bool,
+}
+
+// Am I doing builder patterns wrong?
+impl MCConfig {
+    pub fn new() -> Self {
+        Self { flipped: false }
+    }
+
+    pub fn flipped(self, flipped: bool) -> Self {
+        Self { flipped, ..self }
+    }
+}
+
 pub struct FlashConfig;
 
 pub struct MultipleChoice {
-    _config: MCConfig,
+    config: MCConfig,
     rng: ThreadRng,
     // Maybe ditch these and use the seen and correct of the underlying questions
     correct: i32,
@@ -64,9 +78,16 @@ impl Game for MultipleChoice {
     type Config = MCConfig;
 
     fn new(config: Self::Config, questions: &[Question]) -> MultipleChoice {
-        let questions = questions.to_vec();
+        let mut questions = questions.to_vec();
+        if config.flipped {
+            for term in &mut questions {
+                if let QuestionVariant::Term(card) = term.inner() {
+                    card.flip();
+                }
+            }
+        }
         MultipleChoice {
-            _config: config,
+            config: config,
             rng: thread_rng(),
             correct: 0,
             seen: 0,

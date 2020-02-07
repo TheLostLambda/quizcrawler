@@ -15,27 +15,29 @@ pub fn backtrack(n: u16) {
     print!("{}\r{}", cursor::Up(n), clear::AfterCursor);
 }
 
-pub fn get_valid_char(valid: &[char]) -> char {
+pub fn get_valid_char(valid: &[char]) -> Option<char> {
     let keys: Vec<_> = valid.iter().map(|&c| Key::Char(c)).collect();
+    // This feels a bit verbose
     if let Key::Char(chr) = get_valid_key(&keys[..]) {
-        chr
+        Some(chr)
     } else {
-        ' ' // Just appeasing the type-checker...
+        None
     }
 }
 
+// Use option instead of Key::Null?
 pub fn get_valid_key(valid: &[Key]) -> Key {
     let mut stdout = io::stdout().into_raw_mode().unwrap();
     write!(stdout, "{}", cursor::Hide).unwrap();
     stdout.flush().unwrap();
     for k in io::stdin().keys() {
         match k.unwrap() {
-            Key::Char('q') => graceful_death(&mut stdout),
+            Key::Char('q') => break,
             k if valid.contains(&k) => return k,
             _ => continue,
         }
     }
-    Key::Null // This shouldn't need to be here
+    Key::Null
 }
 
 /// Floats text to be right-aligned
@@ -55,9 +57,10 @@ pub fn override_prompt(wrong: bool) -> bool {
     let mut stdout = io::stdout().into_raw_mode().unwrap();
     write!(stdout, "{}", cursor::Hide).unwrap();
     stdout.flush().unwrap();
+    // Should this be using get_valid_key()?
     for k in io::stdin().keys() {
         match k.unwrap() {
-            Key::Char('q') => graceful_death(&mut stdout),
+            Key::Char('q') => graceful_death(),
             Key::Char('\n') | Key::Char(' ') => return false,
             Key::Char('o') if wrong => return true,
             _ => continue,
@@ -66,7 +69,8 @@ pub fn override_prompt(wrong: bool) -> bool {
     false // Shouldn't be here... Use break and loop?
 }
 
-pub fn graceful_death<W: Write>(term: &mut raw::RawTerminal<W>) {
+pub fn graceful_death() {
+    let mut term = io::stdout().into_raw_mode().unwrap();
     write!(term, "{}", cursor::Show).unwrap();
     term.flush().unwrap();
     term.suspend_raw_mode().unwrap();

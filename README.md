@@ -7,8 +7,9 @@ leverages spaced repetition and forced / active recall to enhance learning. The
 gamification of studying should further increase engagement and recall.
 
 ## What am I doing now?
-  1. Add section summary in tree-view (how many questions and of what type?)
-  2. Fix MC (Similarity + Diminishing Options)
+  1. Reflowing
+  2. Basic Persistence
+  3. Fix MC (Similarity + Diminishing Options)
 
 ## Progress
 ### v1.0.0

@@ -4,6 +4,9 @@ title = "Vocabulary Quizzer"
 # This is a list of all file extensions supported by this config
 exts = ["org"]
 
+# Specify how multi-line data is handled
+flow = "Preserve"
+
 # Sections
 # "(^\*+ )(.*)\s([\s\S]*?)((?=^\1)|\z)"
 [section]

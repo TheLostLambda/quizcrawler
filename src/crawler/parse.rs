@@ -7,10 +7,6 @@ use std::path::Path;
 
 impl Crawler {
     /// Parse flashcards from str
-    // I should also make this return the unmatched portions of string so that the
-    // notes that aren't flashcards can be passed on to the next question parser. By
-    // passing only the remainder of the string, the parsers can become
-    // progressively more general.
     fn parse_terms(&self, src: &str) -> (String, Vec<Question>) {
         if let Some(rules) = self.term.as_ref() {
             let re_str = format!(
@@ -23,8 +19,8 @@ impl Crawler {
             for caps in matches.captures_iter(src) {
                 remainder = remainder.replace(caps.at(0).unwrap(), "");
                 questions.push(Term::new(
-                    util::unflow_string(caps.at(1).unwrap()),
-                    util::unflow_string(caps.at(2).unwrap()),
+                    util::reflow_string(&self.flow, caps.at(1).unwrap()),
+                    util::reflow_string(&self.flow, caps.at(2).unwrap()),
                 ));
             }
             (remainder, questions)
@@ -58,13 +54,13 @@ impl Crawler {
                 let details = match caps.at(3) {
                     Some(b) => sub_matches
                         .captures_iter(b)
-                        .map(|sub_caps| util::unflow_string(sub_caps.at(1).unwrap()))
+                        .map(|sub_caps| util::reflow_string(&self.flow, sub_caps.at(1).unwrap()))
                         .collect(),
                     None => Vec::new(),
                 };
                 questions.push(List::new(
                     caps.at(1).unwrap().parse().unwrap(),
-                    util::unflow_string(caps.at(2).unwrap()),
+                    util::reflow_string(&self.flow, caps.at(2).unwrap()),
                     details,
                 ));
             }
@@ -83,7 +79,7 @@ impl Crawler {
             let mut questions = Vec::new();
             for caps in matches.captures_iter(src) {
                 remainder = remainder.replace(caps.at(0).unwrap(), "");
-                questions.push(Bullet::new(util::unflow_string(caps.at(1).unwrap())));
+                questions.push(Bullet::new(util::reflow_string(&self.flow, caps.at(1).unwrap())));
             }
             (remainder, questions)
         } else {

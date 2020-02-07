@@ -4,11 +4,19 @@
 use serde::Deserialize;
 use std::error::Error;
 
+#[derive(Debug, Deserialize)]
+pub enum ReflowStrategy {
+    Unflow,
+    _Unindent,
+    Preserve,
+}
+
 /// This struct holds all of the configuration data that is parsed from the TOML
 #[derive(Debug, Deserialize)]
 pub struct Crawler {
     pub title: String,
     pub exts: Vec<String>,
+    pub flow: ReflowStrategy, // Should this be in each subsection?
     pub section: Option<SectionConfig>,
     pub term: Option<TermConfig>,
     pub list: Option<ListConfig>,
