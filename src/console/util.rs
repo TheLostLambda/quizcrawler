@@ -32,7 +32,7 @@ pub fn get_valid_key(valid: &[Key]) -> Key {
     stdout.flush().unwrap();
     for k in io::stdin().keys() {
         match k.unwrap() {
-            Key::Char('q') => break,
+            Key::Char('q') => return Key::Null,
             k if valid.contains(&k) => return k,
             _ => continue,
         }
@@ -47,6 +47,9 @@ pub fn float_right(text: &str) {
     print!("\r{}{}", cursor::Right(c - text.len() as u16), text);
 }
 
+// Make this return an Option. When quitting, return None so that the parent
+// function can handle that fallout. As it stands now, this just nukes the whole
+// program, so there is no "back" button
 pub fn override_prompt(wrong: bool) -> bool {
     print!("ENTER or SPACE to continue");
     if wrong {

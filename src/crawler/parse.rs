@@ -79,7 +79,10 @@ impl Crawler {
             let mut questions = Vec::new();
             for caps in matches.captures_iter(src) {
                 remainder = remainder.replace(caps.at(0).unwrap(), "");
-                questions.push(Bullet::new(util::reflow_string(&self.flow, caps.at(1).unwrap())));
+                questions.push(Bullet::new(util::reflow_string(
+                    &self.flow,
+                    caps.at(1).unwrap(),
+                )));
             }
             (remainder, questions)
         } else {

@@ -4,6 +4,9 @@ title = "Borg (Brooks's Org Format)"
 # This is a list of all file extensions supported by this config
 exts = ["org"]
 
+# Specify how multi-line data is handled
+flow = "Unflow"
+
 # Sections
 # "(^\*+ )(.*)\s([\s\S]*?)((?=^\1)|\z)"
 [section]

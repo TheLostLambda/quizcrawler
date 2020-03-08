@@ -1,12 +1,12 @@
 // use crate::core::data::QuestionVariant;
 use crate::console::util::*;
-use crate::core::data::Section;
 use crate::core::games::Game;
 use crate::core::games::*;
 use crate::crawler::data::Crawler;
 use std::char;
 use std::collections::HashMap;
 use std::error::Error;
+use std::fmt::Write;
 use std::fs;
 use std::io;
 use structopt::StructOpt;
@@ -39,7 +39,10 @@ pub fn run() -> Result<(), Box<dyn Error>> {
     loop {
         let node = tree.child_at_path(&path).unwrap();
         if !node.is_parent() {
-            play_game(MultipleChoice::new(MCConfig::new().flipped(args.flipped), &node.questions));
+            play_game(MultipleChoice::new(
+                MCConfig::new().flipped(args.flipped),
+                &node.questions,
+            ));
             path.pop();
             continue;
         }
@@ -53,11 +56,15 @@ pub fn run() -> Result<(), Box<dyn Error>> {
 
         let selected = sel_hist.entry(path.clone()).or_insert(0);
         // ^ I think that the clone here is okay
-        
+
         // Show more and make this nicer
         let selected_node = node.child_at_path(&[children[*selected]]).unwrap();
-        float_right(&format!("{} Children, {} Questions", selected_node.children.len(), selected_node.questions.len()));
-        
+        float_right(&format!(
+            "{} Children, {} Questions",
+            selected_node.children.len(),
+            selected_node.questions.len()
+        ));
+
         println!("\n");
 
         for (id, child) in children.iter().enumerate() {
@@ -74,13 +81,11 @@ pub fn run() -> Result<(), Box<dyn Error>> {
             Key::Up if node.is_parent() && *selected > 0 => *selected -= 1,
             Key::Down if node.is_parent() && *selected < children.len() - 1 => *selected += 1,
             Key::Right if node.is_parent() => path.push(&children[*selected]),
-            Key::Left => {
-                path.pop();
-            }
-            _ => graceful_death(),
+            Key::Left => drop(path.pop()), // This is an alternative to { path.pop(); }
+            Key::Null => graceful_death(),
+            _ => continue,
         };
-    }; 
-    Ok(())
+    }
 }
 
 fn play_game(mut game: impl Game) {
@@ -105,14 +110,15 @@ fn play_game(mut game: impl Game) {
         let choices = game.get_choices();
         let (result, correct_ans) = if !choices.is_empty() {
             let id_shift: u8 = 49;
+            let mut screen = String::new(); // Eventually buffer the whole screen here
             let mut valid = Vec::new();
             for (i, opt) in choices.iter().enumerate() {
                 let id = char::from(i as u8 + id_shift);
-                println!("{}) {} ", id, opt);
+                writeln!(&mut screen, "{}) {} ", id, opt).unwrap(); // Handle errors?
                 valid.push(id);
             }
 
-            println!();
+            println!("{}", screen); // Replace this with a scrolling wrapper
 
             // The char to digit thing here is hacky
             let choice_idx = if let Some(chr) = get_valid_char(&valid) {
@@ -121,7 +127,7 @@ fn play_game(mut game: impl Game) {
                 return;
             };
             // char::from(u8)
-            backtrack(choices.len() as u16 + 1);
+            backtrack(screen.lines().count() as u16 + 1);
             game.answer(&choice_idx.to_string())
         } else {
             let mut ans = String::new();

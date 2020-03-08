@@ -17,7 +17,7 @@ impl Section {
             questions,
         }
     }
-    
+
     pub fn is_parent(&self) -> bool {
         !self.children.is_empty()
     }
@@ -27,10 +27,7 @@ impl Section {
         let mut current = self;
         for name in path {
             // What happens when there are sections with the same name?
-            current = current
-                .children
-                .iter()
-                .find(|c| &c.name == name)?;
+            current = current.children.iter().find(|c| &c.name == name)?;
         }
         Some(current)
     }

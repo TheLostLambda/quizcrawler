@@ -7,7 +7,7 @@ use std::error::Error;
 #[derive(Debug, Deserialize)]
 pub enum ReflowStrategy {
     Unflow,
-    _Unindent,
+    Unindent,
     Preserve,
 }
 

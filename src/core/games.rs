@@ -87,7 +87,7 @@ impl Game for MultipleChoice {
             }
         }
         MultipleChoice {
-            config: config,
+            config,
             rng: thread_rng(),
             correct: 0,
             seen: 0,
