@@ -40,7 +40,7 @@ pub fn run() -> Result<(), Box<dyn Error>> {
         let node = tree.child_at_path(&path).unwrap();
         if !node.is_parent() {
             play_game(MultipleChoice::new(
-                MCConfig::new().flipped(args.flipped),
+                MCConfig { flipped: args.flipped },
                 &node.questions,
             ));
             path.pop();
@@ -81,7 +81,7 @@ pub fn run() -> Result<(), Box<dyn Error>> {
             Key::Up if node.is_parent() && *selected > 0 => *selected -= 1,
             Key::Down if node.is_parent() && *selected < children.len() - 1 => *selected += 1,
             Key::Right if node.is_parent() => path.push(&children[*selected]),
-            Key::Left => drop(path.pop()), // This is an alternative to { path.pop(); }
+            Key::Left => { path.pop(); }, // This is an alternative to drop(path.pop())
             Key::Null => graceful_death(),
             _ => continue,
         };

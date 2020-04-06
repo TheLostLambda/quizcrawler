@@ -17,19 +17,9 @@ pub trait Game {
 
 // Use macros to implement the duplicate methods
 
+#[derive(Default)]
 pub struct MCConfig {
-    flipped: bool,
-}
-
-// Am I doing builder patterns wrong?
-impl MCConfig {
-    pub fn new() -> Self {
-        Self { flipped: false }
-    }
-
-    pub fn flipped(self, flipped: bool) -> Self {
-        Self { flipped, ..self }
-    }
+    pub flipped: bool,
 }
 
 pub struct FlashConfig;
