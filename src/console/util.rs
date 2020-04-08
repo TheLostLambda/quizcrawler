@@ -5,6 +5,17 @@
 // use termion::raw::IntoRawMode;
 // use termion::*;
 
+use tui::{Terminal};
+use tui::backend::CrosstermBackend;
+use crossterm::{terminal, ExecutableCommand};
+use std::io::{self, Stdout};
+use std::error::Error;
+
+pub type TUI = Terminal<CrosstermBackend<Stdout>>;
+pub type Frame<'a> = tui::Frame<'a, CrosstermBackend<Stdout>>;
+
+// Tiny helper functions here!
+
 // /// This clears the screen and moves the cursor to (1,1)
 // pub fn new_screen() {
 //     print!("{}{}", clear::All, cursor::Goto(1, 1));
@@ -72,10 +83,22 @@
 //     false // Shouldn't be here... Use break and loop?
 // }
 
-// pub fn graceful_death() {
-//     let mut term = io::stdout().into_raw_mode().unwrap();
-//     write!(term, "{}", cursor::Show).unwrap();
-//     term.flush().unwrap();
-//     term.suspend_raw_mode().unwrap();
-//     std::process::exit(0);
-// }
+pub fn setup_tui() -> Result<TUI, Box<dyn Error>> {
+    terminal::enable_raw_mode()?;
+    let mut stdout = io::stdout();
+    stdout.execute(terminal::EnterAlternateScreen)?;
+
+    let backend = CrosstermBackend::new(stdout);
+    let mut tui = Terminal::new(backend)?;
+    tui.hide_cursor()?;
+    Ok(tui)
+}
+
+// Should I make a type alias for Result<(), Box<dyn Error>>?
+pub fn teardown_tui(mut tui: TUI) -> Result<(), Box<dyn Error>> {
+    terminal::disable_raw_mode()?;
+    let stdout = tui.backend_mut();
+    stdout.execute(terminal::LeaveAlternateScreen)?;
+    tui.show_cursor()?;
+    Ok(())
+}

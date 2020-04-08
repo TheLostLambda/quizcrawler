@@ -23,7 +23,7 @@ impl Section {
     }
 
     // Write a test function for this!
-    pub fn child_at_path(&self, path: &[&str]) -> Option<&Section> {
+    pub fn child_at_path(&self, path: &Vec<String>) -> Option<&Section> {
         let mut current = self;
         for name in path {
             // What happens when there are sections with the same name?

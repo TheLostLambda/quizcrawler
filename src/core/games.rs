@@ -3,8 +3,6 @@ use rand::prelude::*;
 use rand::seq::IteratorRandom;
 
 pub trait Game {
-    type Config;
-    fn new(config: Self::Config, questions: &[Question]) -> Self;
     fn progress(&self) -> (usize, i32, f64); // (# Remaining, # Seen, % Score)
     /// Moves to a new question and returns the question text
     fn next_question(&mut self) -> Option<&str>;
@@ -16,6 +14,8 @@ pub trait Game {
 }
 
 // Use macros to implement the duplicate methods
+
+// FIXME: I should be consistent here and cli.rs with Options vs Config (naming)
 
 #[derive(Default)]
 pub struct MCConfig {
@@ -46,6 +46,26 @@ pub struct Flashcards {
 }
 
 impl MultipleChoice {
+    fn new(config: MCConfig, questions: &[Question]) -> Self {
+        let mut questions = questions.to_vec();
+        if config.flipped {
+            for term in &mut questions {
+                if let QuestionVariant::Term(card) = term.inner() {
+                    card.flip();
+                }
+            }
+        }
+        Self {
+            config,
+            rng: thread_rng(),
+            correct: 0,
+            seen: 0,
+            idx: 0,
+            questions,
+            choices: Vec::new(),
+        }
+    }
+    
     fn current(&mut self) -> &mut Question {
         &mut self.questions[self.idx]
     }
@@ -59,33 +79,23 @@ impl MultipleChoice {
 }
 
 impl Flashcards {
+    fn new(config: FlashConfig, questions: &[Question]) -> Self {
+        let questions = questions.to_vec();
+        Self {
+            _config: config,
+            rng: thread_rng(),
+            correct: 0,
+            seen: 0,
+            idx: 0,
+            questions,
+        }
+    }
     fn current(&mut self) -> &mut Question {
         &mut self.questions[self.idx]
     }
 }
 
 impl Game for MultipleChoice {
-    type Config = MCConfig;
-
-    fn new(config: Self::Config, questions: &[Question]) -> MultipleChoice {
-        let mut questions = questions.to_vec();
-        if config.flipped {
-            for term in &mut questions {
-                if let QuestionVariant::Term(card) = term.inner() {
-                    card.flip();
-                }
-            }
-        }
-        MultipleChoice {
-            config,
-            rng: thread_rng(),
-            correct: 0,
-            seen: 0,
-            idx: 0,
-            questions,
-            choices: Vec::new(),
-        }
-    }
 
     fn progress(&self) -> (usize, i32, f64) {
         let score = f64::from(self.correct) / self.seen as f64 * 100.0;
@@ -150,19 +160,6 @@ impl Game for MultipleChoice {
 }
 
 impl Game for Flashcards {
-    type Config = FlashConfig;
-
-    fn new(config: Self::Config, questions: &[Question]) -> Flashcards {
-        let questions = questions.to_vec();
-        Flashcards {
-            _config: config,
-            rng: thread_rng(),
-            correct: 0,
-            seen: 0,
-            idx: 0,
-            questions,
-        }
-    }
 
     fn progress(&self) -> (usize, i32, f64) {
         let score = f64::from(self.correct) / self.seen as f64 * 100.0;
