@@ -24,14 +24,15 @@ pub struct MCConfig {
 
 pub struct FlashConfig;
 
-pub struct MultipleChoice {
+pub struct MultipleChoice<'a> {
     config: MCConfig,
     rng: ThreadRng,
     // Maybe ditch these and use the seen and correct of the underlying questions
+    // FIXME: Yeah, you should do that. Make it a method!
     correct: i32,
     seen: i32,
     idx: usize,
-    questions: Vec<Question>,
+    questions: &'a mut [Question],
     choices: Vec<usize>,
 }
 
@@ -45,16 +46,17 @@ pub struct Flashcards {
     questions: Vec<Question>,
 }
 
-impl MultipleChoice {
-    fn new(config: MCConfig, questions: &[Question]) -> Self {
-        let mut questions = questions.to_vec();
-        if config.flipped {
-            for term in &mut questions {
-                if let QuestionVariant::Term(card) = term.inner() {
-                    card.flip();
-                }
-            }
-        }
+impl<'a> MultipleChoice<'a> {
+    fn new(config: MCConfig, questions: &'a mut [Question]) -> Self {
+        //let mut questions = questions.to_vec();
+        // FIXME: Flipping is disabled for the time being...
+        // if config.flipped {
+        //     for term in &mut questions {
+        //         if let QuestionVariant::Term(card) = term.inner() {
+        //             card.flip();
+        //         }
+        //     }
+        // }
         Self {
             config,
             rng: thread_rng(),
@@ -65,7 +67,7 @@ impl MultipleChoice {
             choices: Vec::new(),
         }
     }
-    
+
     fn current(&mut self) -> &mut Question {
         &mut self.questions[self.idx]
     }
@@ -95,8 +97,7 @@ impl Flashcards {
     }
 }
 
-impl Game for MultipleChoice {
-
+impl Game for MultipleChoice<'_> {
     fn progress(&self) -> (usize, i32, f64) {
         let score = f64::from(self.correct) / self.seen as f64 * 100.0;
         (self.questions.len(), self.seen, score)
@@ -146,7 +147,8 @@ impl Game for MultipleChoice {
         let right_ans = right_ans.to_owned(); // This feels hacky
         if correct {
             self.correct += 1;
-            self.questions.remove(self.idx);
+            // FIXME: What to do when questions are complete?
+            //self.questions.remove(self.idx);
         }
         (correct, right_ans)
     }
@@ -155,12 +157,12 @@ impl Game for MultipleChoice {
         self.correct += 1;
         self.current().override_correct();
         // ^ This gets thrown away below...
-        self.questions.remove(self.idx);
+        // FIXME: What to do when questions are complete?
+        //self.questions.remove(self.idx);
     }
 }
 
 impl Game for Flashcards {
-
     fn progress(&self) -> (usize, i32, f64) {
         let score = f64::from(self.correct) / self.seen as f64 * 100.0;
         (self.questions.len(), self.seen, score)

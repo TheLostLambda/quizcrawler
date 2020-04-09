@@ -1,4 +1,7 @@
+use crate::console::data::Quizcrawler;
+use crate::console::util;
 use crate::crawler::data::Crawler;
+use crossterm::event::{self, Event, KeyCode::Char};
 use crossterm::{terminal, ExecutableCommand};
 use std::error::Error;
 use std::fs;
@@ -7,9 +10,6 @@ use structopt::StructOpt;
 use tui::backend::CrosstermBackend;
 use tui::widgets::{Block, Borders, Widget};
 use tui::Terminal;
-use crate::console::util;
-use crossterm::event::{self, Event, KeyCode::Char};
-use crate::console::data::Quizcrawler;
 // Tend to these imports! ^
 
 // Interaction in this file!
@@ -49,14 +49,6 @@ pub fn run() -> Result<(), Box<dyn Error>> {
             _ => continue,
         }
     }
-    
-    // SelectableList::default()
-    //     .block(Block::default().title("SelectableList").borders(Borders::ALL))
-    //     .items(&["Item 1", "Item 2", "Item 3"])
-    //     .select(Some(1))
-    //     .style(Style::default().fg(Color::White))
-    //     .highlight_style(Style::default().modifier(Modifier::ITALIC))
-    //     .highlight_symbol(">>");
 
     util::teardown_tui(tui)?;
 

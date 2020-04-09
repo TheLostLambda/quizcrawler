@@ -5,11 +5,11 @@
 // use termion::raw::IntoRawMode;
 // use termion::*;
 
-use tui::{Terminal};
-use tui::backend::CrosstermBackend;
 use crossterm::{terminal, ExecutableCommand};
-use std::io::{self, Stdout};
 use std::error::Error;
+use std::io::{self, Stdout};
+use tui::backend::CrosstermBackend;
+use tui::Terminal;
 
 pub type TUI = Terminal<CrosstermBackend<Stdout>>;
 pub type Frame<'a> = tui::Frame<'a, CrosstermBackend<Stdout>>;

@@ -26,11 +26,9 @@ pub struct TreeState {
 
 impl TreeState {
     pub fn get_selected_mut(&mut self) -> &mut usize {
-        self.selection_history
-            .entry(self.path.clone())
-            .or_insert(0)
+        self.selection_history.entry(self.path.clone()).or_insert(0)
     }
-    
+
     pub fn get_selected(&self) -> usize {
         *self.selection_history.get(&self.path).unwrap_or(&0)
     }
@@ -61,13 +59,14 @@ impl Quizcrawler {
                 let current = state.get_selected();
                 let selector = state.get_selected_mut();
                 match key {
-                    KeyCode::Up if current > 0 =>
-                        *selector -= 1,
-                    KeyCode::Down if current < limit =>
-                        *selector += 1,
-                    KeyCode::Right if node.children[current].is_parent() =>
-                        state.path.push(child_names[current].to_owned()),
-                    KeyCode::Left => { state.path.pop(); }
+                    KeyCode::Up if current > 0 => *selector -= 1,
+                    KeyCode::Down if current < limit => *selector += 1,
+                    KeyCode::Right if node.children[current].is_parent() => {
+                        state.path.push(child_names[current].to_owned())
+                    }
+                    KeyCode::Left => {
+                        state.path.pop();
+                    }
                     _ => {}
                 }
             }

@@ -3,8 +3,10 @@ use crate::console::util::*;
 use crate::core::data::Section;
 use tui::{
     symbols::line,
-    widgets::{Block, Borders, SelectableList, Widget},
+    widgets::{Block, BorderType, Borders, List, ListState, Text},
 };
+
+// FIXME: Good lord, this file needs some cleaning...
 
 impl Quizcrawler {
     pub fn render(&self, f: &mut Frame) {
@@ -17,18 +19,20 @@ impl Quizcrawler {
     fn tree_view(&self, state: &TreeState, f: &mut Frame) {
         let size = f.size();
         let node = &self.tree.child_at_path(&state.path).unwrap();
-        let child_names: Vec<_> = node.children.iter().map(|x| &x.name[..]).collect();
+        let child_names = node.children.iter().map(|x| Text::raw(&x.name));
         let selected_node = &node.children[state.get_selected()];
-        SelectableList::default()
+        let mut list_state = ListState::default();
+        list_state.select(Some(state.get_selected()));
+        let title = render_title(&self.tree.name, &state.path, selected_node, size.width);
+        let list = List::new(child_names)
             .block(
                 Block::default()
-                    .title(&render_title(&self.tree.name, &state.path, selected_node, size.width))
-                    .borders(Borders::ALL),
+                    .title(&title)
+                    .borders(Borders::ALL)
+                    .border_type(BorderType::Rounded),
             )
-            .items(&child_names)
-            .select(Some(state.get_selected()))
-            .highlight_symbol(">")
-            .render(f, size);
+            .highlight_symbol(">");
+        f.render_stateful_widget(list, size, &mut list_state);
     }
 }
 
@@ -45,6 +49,11 @@ fn render_title(root: &str, rest: &Vec<String>, selected: &Section, width: u16) 
         selected.questions.len()
     );
     // The -2 comes from each corner taking up one char
-    let spacer = line::HORIZONTAL.repeat(width as usize - path.len() - info.len() - 2);
+    let padding = if width as usize > path.len() + info.len() + 2 {
+        width as usize - path.len() - info.len() - 2
+    } else {
+        0
+    };
+    let spacer = line::HORIZONTAL.repeat(padding);
     [path, spacer, info].concat()
 }
