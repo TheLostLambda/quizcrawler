@@ -59,12 +59,12 @@ impl Quizcrawler {
                 let limit = child_names.len() - 1;
                 // This gives me an entry, a mutable reference which is updated in the match
                 let current = state.get_selected();
-                let selected = state.get_selected_mut();
+                let selector = state.get_selected_mut();
                 match key {
                     KeyCode::Up if current > 0 =>
-                        *selected -= 1,
+                        *selector -= 1,
                     KeyCode::Down if current < limit =>
-                        *selected += 1,
+                        *selector += 1,
                     KeyCode::Right if node.children[current].is_parent() =>
                         state.path.push(child_names[current].to_owned()),
                     KeyCode::Left => { state.path.pop(); }
