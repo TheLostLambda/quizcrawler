@@ -1,3 +1,4 @@
+use insta::assert_ron_snapshot;
 use quizcrawler::crawler::data::Crawler;
 use std::fs;
 
@@ -16,6 +17,9 @@ fn crawler() -> Crawler {
 // It's a little bit gross to have crawler stuff in the core test file, but
 // generating sections to test is messy without the crawler
 
+// FIXME: I need to decide if data_str should be a constant or a let everywhere
+// I'm leaning towards changing things to be `const`
+
 #[test]
 fn find_child_at_path() {
     let data_str = r#"
@@ -28,29 +32,8 @@ fn find_child_at_path() {
   - Well done!
 "#;
 
-    let pretty_result = r#"Some(
-    Section {
-        name: "Subtopic A",
-        questions: [
-            Question {
-                data: Bullet(
-                    Bullet {
-                        body: "Well done!",
-                    },
-                ),
-                comp_level: Trimmed,
-                mastery: 0,
-                seen: 0,
-                correct: 0,
-            },
-        ],
-        children: [],
-    },
-)"#;
-
     let path = vec!["Topic 2", "Subtopic A"];
     let section = &crawler().parse_sections(data_str)[0];
-    println!("{:#?}", section);
-    let child = format!("{:#?}", section.child_at_path(&path));
-    assert_eq!(child, pretty_result);
+    let child = section.child_at_path(&path);
+    assert_ron_snapshot!(child, {".**.atime" => "[atime]"});
 }

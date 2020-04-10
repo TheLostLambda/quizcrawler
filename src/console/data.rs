@@ -36,6 +36,7 @@ impl TreeState {
 
 pub enum State {
     TreeView(TreeState),
+    InGame(Box<dyn Game>),
 }
 
 impl Quizcrawler {

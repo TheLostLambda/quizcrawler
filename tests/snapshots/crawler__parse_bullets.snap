@@ -1,0 +1,42 @@
+---
+source: tests/crawler.rs
+expression: cards
+---
+[
+  Section(
+    name: "Terms",
+    questions: [
+      Question(
+        data: Bullet(Bullet(
+          body: "Here is some short, relevant fact regarding this subtopic.",
+        )),
+        comp_level: Trimmed,
+        mastery: 0,
+        seen: 0,
+        correct: 0,
+        atime: "[atime]",
+      ),
+      Question(
+        data: Bullet(Bullet(
+          body: "And another one! Only use these when there is no better option.",
+        )),
+        comp_level: Trimmed,
+        mastery: 0,
+        seen: 0,
+        correct: 0,
+        atime: "[atime]",
+      ),
+      Question(
+        data: Bullet(Bullet(
+          body: "Definitions and processes have their own structures.",
+        )),
+        comp_level: Trimmed,
+        mastery: 0,
+        seen: 0,
+        correct: 0,
+        atime: "[atime]",
+      ),
+    ],
+    children: [],
+  ),
+]

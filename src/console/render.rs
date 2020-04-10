@@ -48,12 +48,5 @@ fn render_title(root: &str, rest: &Vec<String>, selected: &Section, width: u16) 
         selected.children.len(),
         selected.questions.len()
     );
-    // The -2 comes from each corner taking up one char
-    let padding = if width as usize > path.len() + info.len() + 2 {
-        width as usize - path.len() - info.len() - 2
-    } else {
-        0
-    };
-    let spacer = line::HORIZONTAL.repeat(padding);
-    [path, spacer, info].concat()
+    render_titlebar(path, line::HORIZONTAL, info, width)
 }

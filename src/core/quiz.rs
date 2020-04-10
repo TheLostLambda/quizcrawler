@@ -2,7 +2,29 @@ use crate::core::data::{Question, QuestionVariant};
 use rand::prelude::*;
 use rand::seq::IteratorRandom;
 
+pub trait Quiz {
+    /// Sets the `Question` to be asked
+    fn set_question(&mut self, q: &Question);
+    /// Sets the context (a list of other Questions) that this Quiz belongs in
+    fn set_context(&mut self, ctx: &[Question]);
+    /// Ask the Question, returning a &str to be displayed
+    fn ask(&self) -> &str;
+    /// Returns a list of possible answers as &str's to be displayed
+    fn get_choices(&self) -> Vec<&str>;
+    /// Mutates the internal state so that get_choices() gives a hint
+    fn get_hint(&mut self);
+    /// Takes a user answer in the form of a &str, returning if it was correct
+    /// and what the right answer was
+    fn answer(&mut self, ans: &str) -> (bool, &str);
+    /// Override the previous answer, marking it as correct
+    fn i_was_right(&mut self);
+    /// Checks which QuestionVariant is in Question, returning if this quiz is
+    /// applicable to that variant
+    fn is_applicable(&self, q: &Question) -> bool;
+}
+
 pub trait Game {
+    // Add some ID so that questions can prefer a given game?
     fn progress(&self) -> (usize, i32, f64); // (# Remaining, # Seen, % Score)
     /// Moves to a new question and returns the question text
     fn next_question(&mut self) -> Option<&str>;
@@ -19,6 +41,7 @@ pub trait Game {
 
 #[derive(Default)]
 pub struct MCConfig {
+    // Add number of choices & choice numbering
     pub flipped: bool,
 }
 
@@ -47,7 +70,7 @@ pub struct Flashcards {
 }
 
 impl<'a> MultipleChoice<'a> {
-    fn new(config: MCConfig, questions: &'a mut [Question]) -> Self {
+    pub fn new(config: MCConfig, questions: &'a mut [Question]) -> Self {
         //let mut questions = questions.to_vec();
         // FIXME: Flipping is disabled for the time being...
         // if config.flipped {
@@ -81,7 +104,7 @@ impl<'a> MultipleChoice<'a> {
 }
 
 impl Flashcards {
-    fn new(config: FlashConfig, questions: &[Question]) -> Self {
+    pub fn new(config: FlashConfig, questions: &[Question]) -> Self {
         let questions = questions.to_vec();
         Self {
             _config: config,
@@ -140,11 +163,10 @@ impl Game for MultipleChoice<'_> {
         self.get_choices()
     }
 
-    fn answer(&mut self, ans: &str) -> (bool, String) {
+    fn answer(&mut self, ans: &str) -> (bool, &str) {
         let idx: usize = ans.parse().unwrap();
         let ans_str = self.choices()[idx].peek().to_owned();
         let (correct, right_ans) = self.current().answer(&ans_str);
-        let right_ans = right_ans.to_owned(); // This feels hacky
         if correct {
             self.correct += 1;
             // FIXME: What to do when questions are complete?
@@ -186,9 +208,8 @@ impl Game for Flashcards {
         todo!()
     }
 
-    fn answer(&mut self, ans: &str) -> (bool, String) {
+    fn answer(&mut self, ans: &str) -> (bool, &str) {
         let (correct, right_ans) = self.current().answer(ans);
-        let right_ans = right_ans.to_owned(); // This feels hacky
         if correct {
             self.correct += 1;
             self.questions.remove(self.idx);

@@ -1,0 +1,48 @@
+---
+source: tests/crawler.rs
+expression: cards
+---
+[
+  Section(
+    name: "Terms",
+    questions: [
+      Question(
+        data: Term(Term(
+          term: "der / die Lehrer(in)",
+          definition: "teacher",
+          inverted: false,
+        )),
+        comp_level: Trimmed,
+        mastery: 0,
+        seen: 0,
+        correct: 0,
+        atime: "[atime]",
+      ),
+      Question(
+        data: Term(Term(
+          term: "wissen / weiß / hat gewusst",
+          definition: "to know",
+          inverted: false,
+        )),
+        comp_level: Trimmed,
+        mastery: 0,
+        seen: 0,
+        correct: 0,
+        atime: "[atime]",
+      ),
+      Question(
+        data: Term(Term(
+          term: "in der Zwischenzeit",
+          definition: "[in the] meantime",
+          inverted: false,
+        )),
+        comp_level: Trimmed,
+        mastery: 0,
+        seen: 0,
+        correct: 0,
+        atime: "[atime]",
+      ),
+    ],
+    children: [],
+  ),
+]

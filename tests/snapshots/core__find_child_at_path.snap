@@ -1,0 +1,20 @@
+---
+source: tests/core.rs
+expression: child
+---
+Some(Section(
+  name: "Subtopic A",
+  questions: [
+    Question(
+      data: Bullet(Bullet(
+        body: "Well done!",
+      )),
+      comp_level: Trimmed,
+      mastery: 0,
+      seen: 0,
+      correct: 0,
+      atime: "[atime]",
+    ),
+  ],
+  children: [],
+))

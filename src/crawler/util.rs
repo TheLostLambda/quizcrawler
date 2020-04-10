@@ -23,7 +23,7 @@ pub fn reflow_string(strategy: &ReflowStrategy, src: &str) -> String {
 mod tests {
     use super::*;
 
-    const data_str: &'static str = r#"*verb*
+    const DATA_STR: &'static str = r#"*verb*
    1) to make something (such as a colour or a painting) less brilliant by
       covering with a thin coat of opaque or semiopaque colour applied with a
       nearly dry brush
@@ -34,7 +34,7 @@ mod tests {
     fn reflow_unflow() {
         let result = r#"*verb* 1) to make something (such as a colour or a painting) less brilliant by covering with a thin coat of opaque or semiopaque colour applied with a nearly dry brush 2) to soften the lines or colours of (a drawing) by rubbing lightly"#;
         assert_eq!(
-            reflow_string(&ReflowStrategy::Unflow, data_str),
+            reflow_string(&ReflowStrategy::Unflow, DATA_STR),
             result.to_string()
         );
     }
@@ -47,7 +47,7 @@ mod tests {
    nearly dry brush
 2) to soften the lines or colours of (a drawing) by rubbing lightly"#;
         assert_eq!(
-            reflow_string(&ReflowStrategy::Unindent, data_str),
+            reflow_string(&ReflowStrategy::Unindent, DATA_STR),
             result.to_string()
         )
     }
@@ -55,8 +55,8 @@ mod tests {
     #[test]
     fn reflow_preserve() {
         assert_eq!(
-            reflow_string(&ReflowStrategy::Preserve, data_str),
-            data_str.to_string()
+            reflow_string(&ReflowStrategy::Preserve, DATA_STR),
+            DATA_STR.to_string()
         );
     }
 }

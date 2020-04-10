@@ -83,6 +83,17 @@ pub type Frame<'a> = tui::Frame<'a, CrosstermBackend<Stdout>>;
 //     false // Shouldn't be here... Use break and loop?
 // }
 
+pub fn render_titlebar(left: String, spacer: &str, right: String, width: u16) -> String {
+    // The 2 comes from each corner taking up one char
+    let used_space = left.len() + right.len() + 2;
+    if let Some(padding) = (width as usize).checked_sub(used_space) {
+        let spacer = spacer.repeat(padding);
+        [left, spacer, right].concat()
+    } else {
+        [left, right].concat()
+    }
+}
+
 pub fn setup_tui() -> Result<TUI, Box<dyn Error>> {
     terminal::enable_raw_mode()?;
     let mut stdout = io::stdout();

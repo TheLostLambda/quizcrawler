@@ -1,0 +1,50 @@
+---
+source: tests/crawler.rs
+expression: cards
+---
+[
+  Section(
+    name: "Terms",
+    questions: [
+      Question(
+        data: List(List(
+          order: 1,
+          item: "Use numbers to indicate some sort of process or ranking.",
+          details: [
+            "This is an annotation about this step in the process.",
+          ],
+        )),
+        comp_level: Trimmed,
+        mastery: 0,
+        seen: 0,
+        correct: 0,
+        atime: "[atime]",
+      ),
+      Question(
+        data: List(List(
+          order: 2,
+          item: "This, for example, happens after the first point.",
+          details: [],
+        )),
+        comp_level: Trimmed,
+        mastery: 0,
+        seen: 0,
+        correct: 0,
+        atime: "[atime]",
+      ),
+      Question(
+        data: List(List(
+          order: 3,
+          item: "Or perhaps this is the third most expensive solution.",
+          details: [],
+        )),
+        comp_level: Trimmed,
+        mastery: 0,
+        seen: 0,
+        correct: 0,
+        atime: "[atime]",
+      ),
+    ],
+    children: [],
+  ),
+]

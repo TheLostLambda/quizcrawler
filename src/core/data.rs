@@ -1,7 +1,9 @@
 use crate::core::logic;
+use serde::{Deserialize, Serialize};
+use std::time::SystemTime;
 
 // I really don't know how I feel about these public fields...
-#[derive(Debug, Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Section {
     pub name: String,
     pub questions: Vec<Question>,
@@ -22,44 +24,43 @@ impl Section {
         !self.children.is_empty()
     }
 
-    // Write a test function for this!
-    pub fn child_at_path(&self, path: &Vec<String>) -> Option<&Section> {
+    pub fn child_at_path(&self, path: &[impl AsRef<str>]) -> Option<&Section> {
         let mut current = self;
         for name in path {
-            // What happens when there are sections with the same name?
-            current = current.children.iter().find(|c| &c.name == name)?;
+            // FIXME: What happens when there are sections with the same name?
+            current = current.children.iter().find(|c| &c.name == name.as_ref())?;
         }
         Some(current)
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum Strictness {
     Exact,
     Trimmed,
     Caseless,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Question {
-    data: QuestionVariant,
-    comp_level: Strictness,
-    mastery: u8, // (0-5 or 0-10?)
-    seen: u32,
-    correct: u32,
+    pub data: QuestionVariant,
+    pub comp_level: Strictness, // FIXME: Should this be moved up to the state machine?
+    pub mastery: u8,            // 0-10 (Leitner System)
+    pub seen: u32,
+    pub correct: u32,
+    pub atime: SystemTime,
 }
 
 /// Question Enum
-#[derive(Debug, Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum QuestionVariant {
     Term(Term),
     List(List),
     Bullet(Bullet),
-    _Equation(),
 }
 
 /// Flash Cards
-#[derive(Debug, Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Term {
     term: String,
     definition: String,
@@ -68,14 +69,14 @@ pub struct Term {
 
 // Not a fan of this section having children, but I'll allow it for now
 // Also, term? item? body? Pick one.
-#[derive(Debug, Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct List {
     order: u32,
     item: String,
     details: Vec<String>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Bullet {
     body: String,
 }
@@ -116,9 +117,10 @@ impl Question {
         Question {
             data,
             comp_level: Strictness::Trimmed,
-            mastery: 0, // (0-5 or 0-10?)
+            mastery: 0,
             seen: 0,
             correct: 0,
+            atime: SystemTime::now(),
         }
     }
 
@@ -131,7 +133,7 @@ impl Question {
                     &t.term
                 }
             }
-            _ => "",
+            _ => todo!(),
         }
     }
 
@@ -144,7 +146,7 @@ impl Question {
                     &t.definition
                 }
             }
-            _ => "",
+            _ => todo!(),
         }
     }
 
@@ -156,27 +158,6 @@ impl Question {
             self.correct += 1;
         }
         (correct, self.peek())
-    }
-
-    // I'm not a massive fan of this...
-    pub fn inner(&mut self) -> &mut QuestionVariant {
-        &mut self.data
-    }
-
-    pub fn _set_comp_level(&mut self, cl: Strictness) {
-        self.comp_level = cl;
-    }
-
-    pub fn _get_comp_level(&self) -> &Strictness {
-        &self.comp_level
-    }
-    // Replace this and times_correct with a single "mastery" value
-    pub fn _times_seen(&self) -> u32 {
-        self.seen
-    }
-
-    pub fn _times_correct(&self) -> u32 {
-        self.correct
     }
 
     pub fn override_correct(&mut self) {

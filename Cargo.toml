@@ -9,8 +9,13 @@ clap = "*"
 crossterm = "*"
 onig = "*"
 rand = "*"
+ron = "*"
 structopt = "*"
 toml = "*"
+
+[dependencies.insta]
+version = "*"
+features = ["ron", "redactions"]
 
 [dependencies.serde]
 version = "*"
