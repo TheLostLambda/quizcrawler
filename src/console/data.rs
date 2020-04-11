@@ -1,6 +1,5 @@
 use crate::core::data::Section;
-use crate::core::games::Game;
-use crate::core::games::*;
+use crate::core::quiz::Quiz;
 use crossterm::event::KeyCode;
 use std::collections::HashMap;
 
@@ -15,7 +14,7 @@ pub struct Quizcrawler {
     pub tree: Section,
     pub options: QCOptions,
     pub state_stack: Vec<State>,
-    pub games: Vec<Box<dyn Game>>, // FIXME: Does this actually serve any purpose?
+    // pub games: Vec<Box<dyn Quiz>>, // FIXME: Does this actually serve any purpose?
 }
 
 #[derive(Default)]
@@ -36,7 +35,6 @@ impl TreeState {
 
 pub enum State {
     TreeView(TreeState),
-    InGame(Box<dyn Game>),
 }
 
 impl Quizcrawler {
@@ -44,7 +42,7 @@ impl Quizcrawler {
         Self {
             tree,
             options,
-            games: Vec::new(),
+            //games: Vec::new(),
             state_stack: vec![State::TreeView(Default::default())],
         }
     }

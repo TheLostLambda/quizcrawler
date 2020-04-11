@@ -46,8 +46,8 @@ pub struct Question {
     pub data: QuestionVariant,
     pub comp_level: Strictness, // FIXME: Should this be moved up to the state machine?
     pub mastery: u8,            // 0-10 (Leitner System)
-    pub seen: u32,
-    pub correct: u32,
+    pub seen: usize,
+    pub correct: usize,
     pub atime: SystemTime,
 }
 
