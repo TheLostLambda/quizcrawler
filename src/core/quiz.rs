@@ -1,18 +1,32 @@
 use crate::core::data::{Question, QuestionVariant};
 use rand::prelude::*;
 use rand::seq::{IteratorRandom, SliceRandom};
+use std::{
+    borrow::Borrow,
+    cell::{RefCell, RefMut},
+    rc::Rc,
+};
 
-pub struct QuizDispatcher<'a> {
-    questions: &'a mut [Question],
-    quizzes: &'a mut [Box<dyn Quiz<'a>>],
+// FIXME: Add some explanations
+type QuestionList = Rc<Vec<RefCell<Question>>>;
+type QuizList = Rc<Vec<RefCell<Box<dyn Quiz>>>>;
+
+pub struct QuizDispatcher {
+    questions: QuestionList,
+    quizzes: QuizList,
     reference: Vec<Question>,
     rng: ThreadRng,
 }
 
-impl<'a> QuizDispatcher<'a> {
+impl QuizDispatcher {
     /// Set the list of `Question`'s to ask and `Quiz`'s to be dispatched
-    pub fn new(questions: &'a mut [Question], quizzes: &'a mut [Box<dyn Quiz<'a>>]) -> Self {
-        let reference = questions.to_owned();
+    pub fn new(questions: QuestionList, quizzes: QuizList) -> Self {
+        // FIXME: Add some explanations
+        let reference = questions
+            .iter()
+            .cloned()
+            .map(|rc| rc.into_inner())
+            .collect();
         let rng = thread_rng();
         Self {
             questions,
@@ -24,18 +38,20 @@ impl<'a> QuizDispatcher<'a> {
 
     /// Sorts `Question`s by mastery, then dispatches a random `Quiz` if one
     /// is available
-    pub fn next(&'a mut self) -> Option<&Box<dyn Quiz<'a>>> {
+    /*     pub fn next(&mut self) -> Option<RefMut<Box<dyn Quiz>>> {
         // FIXME: Implement priority sorting and end the quiz after mastery
-        let mut question = self.questions.choose_mut(&mut self.rng)?;
-        let mut quiz = self
-            .quizzes
-            .iter_mut()
-            .filter(|qz| qz.is_applicable(question))
-            .choose(&mut self.rng)?;
+        let mut questions = self.questions.borrow_mut();
+        let mut quizzes = self.quizzes.borrow_mut();
+        let mut question = questions.choose_mut(&mut self.rng)?;
+        let mut quiz = RefMut::map(quizzes, |t|
+            t.iter_mut()
+                .filter(|qz| qz.is_applicable(question))
+                .choose(&mut self.rng).unwrap()
+        );
         quiz.set_question(question);
-        quiz.set_context(&self.questions);
+        quiz.set_context(&self.questions.borrow());
         Some(quiz)
-    }
+    } */
 
     /// Returns the number of questions remaining and the current score as a
     /// percentage
@@ -45,11 +61,11 @@ impl<'a> QuizDispatcher<'a> {
     }
 }
 
-pub trait Quiz<'a> {
+pub trait Quiz {
     /// Sets the `Question` to be asked
-    fn set_question(&'a mut self, q: &'a mut Question);
+    fn set_question(&mut self, q: &mut Question);
     /// Sets the context (a list of `Questions`) that this Quiz belongs in
-    fn set_context(&'a mut self, ctx: &'a [Question]);
+    fn set_context(&mut self, ctx: &[Question]);
     /// Ask the `Question`, returning a `&str` to be displayed
     fn ask(&self) -> &str;
     /// Returns a list of possible answers as `&str`'s to be displayed
@@ -92,13 +108,13 @@ impl MultipleChoice<'_> {
     }
 }
 
-impl<'a> Quiz<'a> for MultipleChoice<'a> {
-    fn set_question(&'a mut self, q: &'a mut Question) {
-        self.question = Some(q);
+impl<'a> Quiz for MultipleChoice<'a> {
+    fn set_question(&mut self, q: &mut Question) {
+        todo!()
     }
 
-    fn set_context(&'a mut self, ctx: &'a [Question]) {
-        self.context = ctx;
+    fn set_context(&mut self, ctx: &[Question]) {
+        todo!()
     }
 
     fn ask(&self) -> &str {
