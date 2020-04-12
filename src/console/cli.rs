@@ -41,12 +41,16 @@ pub fn run() -> Result<(), Box<dyn Error>> {
 
     use crate::core::quiz::*;
     use std::{cell::RefCell, rc::Rc};
-    let quizzes = vec![Rc::new(RefCell::new(
-        Box::new(MultipleChoice::default()) as Box<dyn Quiz>
-    ))];
-    let questions = tree.clone().questions;
+
+    // FIXME: Put me somewhere appropriate
+    fn into_quiz<'a>(quiz: impl Quiz + 'a) -> Rc<RefCell<Box<dyn Quiz + 'a>>> {
+        Rc::new(RefCell::new(Box::new(quiz)))
+    }
+
+    // FIXME: Write an impl for Into / From so MultipleChoice.into() is valid
+    let quizzes = vec![into_quiz(MultipleChoice::default())];
+    let questions = tree.questions.clone();
     let mut dispatcher = QuizDispatcher::new(&questions, &quizzes);
-    // FIXME: Look into implementing Deref on Rc<RefCell<T>>
     if let Some(quiz) = dispatcher.next() {
         dbg!(quiz.borrow().ask());
     } else {
