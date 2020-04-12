@@ -6,17 +6,19 @@ use std::{cell::RefCell, rc::Rc, time::SystemTime};
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Section {
     pub name: String,
-    pub questions: Vec<Question>,
+    pub questions: Rc<Vec<Rc<RefCell<Question>>>>,
     pub children: Vec<Section>,
 }
 
 impl Section {
     // Not sure if I should keep this around...
     pub fn new(name: String, children: Vec<Section>, questions: Vec<Question>) -> Section {
+        let questions = questions.into_iter().map(|c| Rc::new(RefCell::new(c))).collect();
         Section {
             name,
-            children,
-            questions,
+            // FIXME: Ew
+            children: children,
+            questions: Rc::new(questions),
         }
     }
 
@@ -35,7 +37,7 @@ impl Section {
 
     // FIXME: Ew
     pub fn get_questions(&self) -> Rc<Vec<Rc<RefCell<Question>>>> {
-        todo!()
+        Rc::clone(&self.questions)
     }
 }
 

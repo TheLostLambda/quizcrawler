@@ -19,7 +19,7 @@ features = ["ron", "redactions"]
 
 [dependencies.serde]
 version = "*"
-features = ["derive"]
+features = ["derive", "rc"]
 
 [dependencies.tui]
 git = "https://github.com/fdehau/tui-rs.git"
