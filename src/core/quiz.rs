@@ -8,8 +8,10 @@ use std::{
 };
 
 // FIXME: Add some explanations
-type QuestionList = Rc<Vec<RefCell<Question>>>;
-type QuizList = Rc<Vec<RefCell<Box<dyn Quiz>>>>;
+type QuestionRef = Rc<RefCell<Question>>;
+type QuizRef = Rc<RefCell<Box<dyn Quiz>>>;
+type QuestionList = Rc<Vec<QuestionRef>>;
+type QuizList = Rc<Vec<QuizRef>>;
 
 pub struct QuizDispatcher {
     questions: QuestionList,
@@ -24,8 +26,7 @@ impl QuizDispatcher {
         // FIXME: Add some explanations
         let reference = questions
             .iter()
-            .cloned()
-            .map(|rc| rc.into_inner())
+            .map(|rc| (**rc).clone().into_inner())
             .collect();
         let rng = thread_rng();
         Self {
@@ -38,20 +39,25 @@ impl QuizDispatcher {
 
     /// Sorts `Question`s by mastery, then dispatches a random `Quiz` if one
     /// is available
-    /*     pub fn next(&mut self) -> Option<RefMut<Box<dyn Quiz>>> {
+    pub fn next(&mut self) -> Option<QuizRef> {
         // FIXME: Implement priority sorting and end the quiz after mastery
-        let mut questions = self.questions.borrow_mut();
-        let mut quizzes = self.quizzes.borrow_mut();
-        let mut question = questions.choose_mut(&mut self.rng)?;
-        let mut quiz = RefMut::map(quizzes, |t|
-            t.iter_mut()
-                .filter(|qz| qz.is_applicable(question))
-                .choose(&mut self.rng).unwrap()
-        );
-        quiz.set_question(question);
-        quiz.set_context(&self.questions.borrow());
+        let question = self.questions.iter().cloned().choose(&mut self.rng)?;
+        let quiz = self
+            .quizzes
+            .iter()
+            .cloned()
+            .filter(|qz| {
+                let qz = (**qz).borrow();
+                qz.is_applicable(&(*question).borrow())
+            })
+            .choose(&mut self.rng)?;
+        {
+            let mut quiz = quiz.borrow_mut();
+            quiz.set_question(question);
+            quiz.set_context(Rc::clone(&self.questions));
+        }
         Some(quiz)
-    } */
+    }
 
     /// Returns the number of questions remaining and the current score as a
     /// percentage
@@ -63,9 +69,9 @@ impl QuizDispatcher {
 
 pub trait Quiz {
     /// Sets the `Question` to be asked
-    fn set_question(&mut self, q: &mut Question);
+    fn set_question(&mut self, q: QuestionRef);
     /// Sets the context (a list of `Questions`) that this Quiz belongs in
-    fn set_context(&mut self, ctx: &[Question]);
+    fn set_context(&mut self, ctx: QuestionList);
     /// Ask the `Question`, returning a `&str` to be displayed
     fn ask(&self) -> &str;
     /// Returns a list of possible answers as `&str`'s to be displayed
@@ -92,14 +98,14 @@ pub struct MCConfig {
 }
 
 #[derive(Default)]
-pub struct MultipleChoice<'a> {
+pub struct MultipleChoice {
     pub config: MCConfig,
-    pub question: Option<&'a mut Question>,
-    pub context: &'a [Question],
+    pub question: Option<QuestionRef>,
+    pub context: QuestionList,
     choices: Vec<usize>,
 }
 
-impl MultipleChoice<'_> {
+impl MultipleChoice {
     pub fn new(config: MCConfig) -> Self {
         Self {
             config,
@@ -108,13 +114,13 @@ impl MultipleChoice<'_> {
     }
 }
 
-impl<'a> Quiz for MultipleChoice<'a> {
-    fn set_question(&mut self, q: &mut Question) {
-        todo!()
+impl Quiz for MultipleChoice {
+    fn set_question(&mut self, q: QuestionRef) {
+        self.question = Some(q);
     }
 
-    fn set_context(&mut self, ctx: &[Question]) {
-        todo!()
+    fn set_context(&mut self, ctx: QuestionList) {
+        self.context = ctx;
     }
 
     fn ask(&self) -> &str {

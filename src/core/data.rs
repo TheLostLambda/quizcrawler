@@ -1,6 +1,6 @@
 use crate::core::logic;
 use serde::{Deserialize, Serialize};
-use std::time::SystemTime;
+use std::{cell::RefCell, rc::Rc, time::SystemTime};
 
 // I really don't know how I feel about these public fields...
 #[derive(Clone, Serialize, Deserialize)]
@@ -31,6 +31,11 @@ impl Section {
             current = current.children.iter().find(|c| &c.name == name.as_ref())?;
         }
         Some(current)
+    }
+
+    // FIXME: Ew
+    pub fn get_questions(&self) -> Rc<Vec<Rc<RefCell<Question>>>> {
+        todo!()
     }
 }
 
