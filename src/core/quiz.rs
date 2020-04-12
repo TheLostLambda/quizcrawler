@@ -10,19 +10,20 @@ use std::{
 // FIXME: Add some explanations
 type QuestionRef = Rc<RefCell<Question>>;
 type QuizRef = Rc<RefCell<Box<dyn Quiz>>>;
-type QuestionList = Rc<Vec<QuestionRef>>;
-type QuizList = Rc<Vec<QuizRef>>;
 
-pub struct QuizDispatcher {
-    questions: QuestionList,
-    quizzes: QuizList,
+// type QuestionCell = Rc<RefCell<Question>>
+// ^ Make 
+
+pub struct QuizDispatcher<'a> {
+    questions: &'a [QuestionRef],
+    quizzes: &'a [QuizRef],
     reference: Vec<Question>,
     rng: ThreadRng,
 }
 
-impl QuizDispatcher {
+impl<'a> QuizDispatcher<'a> {
     /// Set the list of `Question`'s to ask and `Quiz`'s to be dispatched
-    pub fn new(questions: QuestionList, quizzes: QuizList) -> Self {
+    pub fn new(questions: &'a [QuestionRef], quizzes: &'a [QuizRef]) -> Self {
         // FIXME: Add some explanations
         let reference = questions
             .iter()
@@ -54,7 +55,7 @@ impl QuizDispatcher {
         {
             let mut quiz = quiz.borrow_mut();
             quiz.set_question(question);
-            quiz.set_context(Rc::clone(&self.questions));
+            quiz.set_context(self.questions.to_vec());
         }
         Some(quiz)
     }
@@ -71,7 +72,7 @@ pub trait Quiz {
     /// Sets the `Question` to be asked
     fn set_question(&mut self, q: QuestionRef);
     /// Sets the context (a list of `Questions`) that this Quiz belongs in
-    fn set_context(&mut self, ctx: QuestionList);
+    fn set_context(&mut self, ctx: Vec<QuestionRef>);
     /// Ask the `Question`, returning a `&str` to be displayed
     fn ask(&self) -> &str;
     /// Returns a list of possible answers as `&str`'s to be displayed
@@ -101,7 +102,7 @@ pub struct MCConfig {
 pub struct MultipleChoice {
     pub config: MCConfig,
     pub question: Option<QuestionRef>,
-    pub context: QuestionList,
+    pub context: Vec<QuestionRef>,
     choices: Vec<usize>,
 }
 
@@ -119,7 +120,7 @@ impl Quiz for MultipleChoice {
         self.question = Some(q);
     }
 
-    fn set_context(&mut self, ctx: QuestionList) {
+    fn set_context(&mut self, ctx: Vec<QuestionRef>) {
         self.context = ctx;
     }
 

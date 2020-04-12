@@ -3,10 +3,11 @@ use serde::{Deserialize, Serialize};
 use std::{cell::RefCell, rc::Rc, time::SystemTime};
 
 // I really don't know how I feel about these public fields...
+// FIXME: Add some type synonyms here
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Section {
     pub name: String,
-    pub questions: Rc<Vec<Rc<RefCell<Question>>>>,
+    pub questions: Vec<Rc<RefCell<Question>>>,
     pub children: Vec<Section>,
 }
 
@@ -16,9 +17,8 @@ impl Section {
         let questions = questions.into_iter().map(|c| Rc::new(RefCell::new(c))).collect();
         Section {
             name,
-            // FIXME: Ew
-            children: children,
-            questions: Rc::new(questions),
+            children,
+            questions,
         }
     }
 
@@ -36,8 +36,8 @@ impl Section {
     }
 
     // FIXME: Ew
-    pub fn get_questions(&self) -> Rc<Vec<Rc<RefCell<Question>>>> {
-        Rc::clone(&self.questions)
+    pub fn get_questions(&self) -> &[Rc<RefCell<Question>>] {
+        &self.questions[..]
     }
 }
 
