@@ -1,4 +1,4 @@
-use crate::core::data::{Question, QuestionVariant};
+use crate::core::data::{Question, QuestionRef, QuestionVariant};
 use rand::prelude::*;
 use rand::seq::{IteratorRandom, SliceRandom};
 use std::{
@@ -8,11 +8,10 @@ use std::{
 };
 
 // FIXME: Add some explanations
-type QuestionRef = Rc<RefCell<Question>>;
 type QuizRef = Rc<RefCell<Box<dyn Quiz>>>;
 
 // type QuestionCell = Rc<RefCell<Question>>
-// ^ Make 
+// ^ Make
 
 pub struct QuizDispatcher<'a> {
     questions: &'a [QuestionRef],

@@ -2,19 +2,24 @@ use crate::core::logic;
 use serde::{Deserialize, Serialize};
 use std::{cell::RefCell, rc::Rc, time::SystemTime};
 
+// FIXME: Add some explanations
+pub type QuestionRef = Rc<RefCell<Question>>;
+
 // I really don't know how I feel about these public fields...
-// FIXME: Add some type synonyms here
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Section {
     pub name: String,
-    pub questions: Vec<Rc<RefCell<Question>>>,
+    pub questions: Vec<QuestionRef>,
     pub children: Vec<Section>,
 }
 
 impl Section {
     // Not sure if I should keep this around...
     pub fn new(name: String, children: Vec<Section>, questions: Vec<Question>) -> Section {
-        let questions = questions.into_iter().map(|c| Rc::new(RefCell::new(c))).collect();
+        let questions = questions
+            .into_iter()
+            .map(|c| Rc::new(RefCell::new(c)))
+            .collect();
         Section {
             name,
             children,
@@ -36,7 +41,7 @@ impl Section {
     }
 
     // FIXME: Ew
-    pub fn get_questions(&self) -> &[Rc<RefCell<Question>>] {
+    pub fn get_questions(&self) -> &[QuestionRef] {
         &self.questions[..]
     }
 }
