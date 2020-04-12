@@ -72,15 +72,17 @@ pub trait Quiz {
     fn set_question(&mut self, q: QuestionRef);
     /// Sets the context (a list of `Questions`) that this Quiz belongs in
     fn set_context(&mut self, ctx: Vec<QuestionRef>);
-    /// Ask the `Question`, returning a `&str` to be displayed
-    fn ask(&self) -> &str;
-    /// Returns a list of possible answers as `&str`'s to be displayed
-    fn get_choices(&self) -> Vec<&str>;
+    /// Ask the `Question`, returning a `String` to be displayed. This returns
+    /// a `String`, not a `&str`, so quizzes can do formatting on the question
+    /// string before it's passed to the console
+    fn ask(&self) -> String;
+    /// Returns a list of possible answers as `String`'s to be displayed
+    fn get_choices(&self) -> Vec<String>;
     /// Mutates the internal state so that a hint is provided by other calls
     fn get_hint(&mut self);
     /// Takes a user answer in the form of a `&str`, returning if it was
     /// correct and what the right answer was
-    fn answer(&mut self, ans: &str) -> (bool, &str);
+    fn answer(&mut self, ans: &str) -> (bool, String);
     /// Override the previous answer, marking it as correct
     fn i_was_right(&mut self);
     /// Checks which `QuestionVariant` is in `Question`, returning if this quiz
@@ -123,11 +125,16 @@ impl Quiz for MultipleChoice {
         self.context = ctx;
     }
 
-    fn ask(&self) -> &str {
-        todo!()
+    // Pass in a printing closure: ask(&self, Question -> ()) [Prolly not]
+    fn ask(&self) -> String {
+        // Should I use an if-let here?
+        match self.question {
+            Some(ref q) => (**q).borrow().ask().to_string(), // Ew
+            None => String::new(),
+        }
     }
 
-    fn get_choices(&self) -> Vec<&str> {
+    fn get_choices(&self) -> Vec<String> {
         todo!()
     }
 
@@ -135,7 +142,7 @@ impl Quiz for MultipleChoice {
         todo!()
     }
 
-    fn answer(&mut self, ans: &str) -> (bool, &str) {
+    fn answer(&mut self, ans: &str) -> (bool, String) {
         todo!()
     }
 
@@ -144,7 +151,10 @@ impl Quiz for MultipleChoice {
     }
 
     fn is_applicable(&self, q: &Question) -> bool {
-        todo!()
+        match q.data {
+            QuestionVariant::Term(_) => true,
+            _ => false,
+        }
     }
 }
 

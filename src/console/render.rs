@@ -20,7 +20,7 @@ impl Quizcrawler {
         let size = f.size();
         let node = &self.tree.child_at_path(&state.path).unwrap();
         let child_names = node.children.iter().map(|x| Text::raw(&x.name));
-        let selected_node = &node.children[state.get_selected()];
+        let selected_node = &node.children[state.get_selected()]; // FIXME: This panics
         let mut list_state = ListState::default();
         list_state.select(Some(state.get_selected()));
         let title = render_title(&self.tree.name, &state.path, selected_node, size.width);

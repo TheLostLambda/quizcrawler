@@ -7,9 +7,11 @@ leverages spaced repetition and forced / active recall to enhance learning. The
 gamification of studying should further increase engagement and recall.
 
 ## What am I doing now?
-  1. UI scrolling and jump into quiz options
-  2. Basic Persistence
-  3. Fix MC (Similarity + Diminishing Options)
+  1. Testing QuizDispatcher with questions
+  2. Finishing Quiz implementation
+  3. UI scrolling and jump into quiz options
+  4. Basic Persistence
+  5. Fix MC (Similarity + Diminishing Options)
 
 ## Progress
 ### v1.0.0
