@@ -37,34 +37,6 @@ pub fn run() -> Result<(), Box<dyn Error>> {
     let crawler = Crawler::new(&crawler_recipe)?;
     let tree = crawler.parse_file(&args.notes);
 
-    // Have some scratch work
-
-    use crate::core::quiz::*;
-    use std::{cell::RefCell, rc::Rc};
-
-    let questions = tree.child_at_path(&["Scratch"]).unwrap().questions.clone();
-    dbg!(questions.len());
-
-    // Old system
-    /* fn into_quiz(quiz: impl Quiz + 'static) -> QuizRef {
-        Rc::new(RefCell::new(Box::new(quiz)))
-    }
-
-    let quizzes = vec![into_quiz(MultipleChoice::default())];
-    let mut dispatcher = QuizDispatcher::new(&questions, quizzes); */
-
-    // New system
-    let mut dispatcher = QuizDispatcher::new(questions);
-    dispatcher.register_quiz(MultipleChoice::default());
-
-    if let Some(quiz) = dispatcher.next() {
-        dbg!(quiz.borrow().ask());
-    } else {
-        eprintln!("Nothing to ask!")
-    }
-
-    // End of the shit zone
-
     let mut tui = util::setup_tui()?;
 
     let mut quizcrawler = Quizcrawler::new(Default::default(), tree);

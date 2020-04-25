@@ -81,17 +81,15 @@ impl Quizcrawler {
                 }
             }
             // FIXME: Move this to a non-input loop
-            Some(State::Dispatch(dispatcher)) => {
-                match dispatcher.next() {
-                    Some(quiz) => {
-                        let progress = dispatcher.progress();
-                        self.state_stack.push(State::AskQuestion(quiz, progress));
-                    }
-                    None => {
-                        self.state_stack.pop();
-                    }
+            Some(State::Dispatch(dispatcher)) => match dispatcher.next() {
+                Some(quiz) => {
+                    let progress = dispatcher.progress();
+                    self.state_stack.push(State::AskQuestion(quiz, progress));
                 }
-            }
+                None => {
+                    self.state_stack.pop();
+                }
+            },
             _ => {}
         }
     }

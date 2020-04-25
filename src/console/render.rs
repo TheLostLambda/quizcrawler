@@ -6,7 +6,7 @@ use tui::{
     widgets::{Block, BorderType, Borders, List, ListState, Paragraph, Text},
 };
 // FIXME: Do I want this in this file? Maybe I need a type synonym file...
-use crate::core::quiz::{QuizRef, Progress};
+use crate::core::quiz::{Progress, QuizRef};
 
 // FIXME: Good lord, this file needs some cleaning...
 
@@ -40,15 +40,19 @@ impl Quizcrawler {
 
     fn ask_question(&self, quiz: &QuizRef, progress: &Progress, f: &mut Frame) {
         let size = f.size();
-        let title = render_titlebar("Left".to_string(), line::HORIZONTAL, "Right".to_string(), size.width);
+        let title = render_titlebar(
+            "Left".to_string(),
+            line::HORIZONTAL,
+            "Right".to_string(),
+            size.width,
+        );
         let text = [Text::raw("Howdy")];
-        let list = Paragraph::new(text.iter())
-            .block(
-                Block::default()
-                    .title(&title)
-                    .borders(Borders::ALL)
-                    .border_type(BorderType::Rounded),
-            );
+        let list = Paragraph::new(text.iter()).block(
+            Block::default()
+                .title(&title)
+                .borders(Borders::ALL)
+                .border_type(BorderType::Rounded),
+        );
         f.render_widget(list, size);
     }
 }
