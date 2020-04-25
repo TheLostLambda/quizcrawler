@@ -7,7 +7,7 @@ leverages spaced repetition and forced / active recall to enhance learning. The
 gamification of studying should further increase engagement and recall.
 
 ## What am I doing now?
-  1. Testing QuizDispatcher with questions
+  1. Add a compute loop decoupled from input (for Dispatch -> Ask transition)
   2. Finishing Quiz implementation
   3. UI scrolling and jump into quiz options
   4. Basic Persistence

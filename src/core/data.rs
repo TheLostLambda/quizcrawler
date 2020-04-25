@@ -39,11 +39,6 @@ impl Section {
         }
         Some(current)
     }
-
-    // FIXME: Ew
-    pub fn get_questions(&self) -> &[QuestionRef] {
-        &self.questions[..]
-    }
 }
 
 #[derive(Clone, Serialize, Deserialize)]

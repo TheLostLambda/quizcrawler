@@ -3,15 +3,18 @@ use crate::console::util::*;
 use crate::core::data::Section;
 use tui::{
     symbols::line,
-    widgets::{Block, BorderType, Borders, List, ListState, Text},
+    widgets::{Block, BorderType, Borders, List, ListState, Paragraph, Text},
 };
+// FIXME: Do I want this in this file? Maybe I need a type synonym file...
+use crate::core::quiz::{QuizRef, Progress};
 
 // FIXME: Good lord, this file needs some cleaning...
 
 impl Quizcrawler {
     pub fn render(&self, f: &mut Frame) {
         match self.state_stack.last() {
-            Some(State::TreeView(state)) => self.tree_view(&state, f),
+            Some(State::TreeView(s)) => self.tree_view(&s, f),
+            Some(State::AskQuestion(q, p)) => self.ask_question(&q, p, f),
             _ => {}
         }
     }
@@ -34,9 +37,23 @@ impl Quizcrawler {
             .highlight_symbol(">");
         f.render_stateful_widget(list, size, &mut list_state);
     }
+
+    fn ask_question(&self, quiz: &QuizRef, progress: &Progress, f: &mut Frame) {
+        let size = f.size();
+        let title = render_titlebar("Left".to_string(), line::HORIZONTAL, "Right".to_string(), size.width);
+        let text = [Text::raw("Howdy")];
+        let list = Paragraph::new(text.iter())
+            .block(
+                Block::default()
+                    .title(&title)
+                    .borders(Borders::ALL)
+                    .border_type(BorderType::Rounded),
+            );
+        f.render_widget(list, size);
+    }
 }
 
-// FIXME: Not sure where this belongs...
+// FIXME: Not sure where this belongs... Should be TreeView specific
 // This should also shorten the path when it gets too long
 fn render_title(root: &str, rest: &Vec<String>, selected: &Section, width: u16) -> String {
     let mut path = vec![root.to_owned()];

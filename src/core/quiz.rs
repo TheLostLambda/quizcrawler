@@ -8,33 +8,40 @@ use std::{
 };
 
 // FIXME: Add some explanations
-type QuizRef = Rc<RefCell<Box<dyn Quiz>>>;
+pub type QuizRef = Rc<RefCell<Box<dyn Quiz>>>;
+pub type Progress = (usize, f64);
 
 // type QuestionCell = Rc<RefCell<Question>>
 // ^ Make
 
-pub struct QuizDispatcher<'a> {
-    questions: &'a [QuestionRef],
-    quizzes: &'a [QuizRef],
+pub struct QuizDispatcher {
+    questions: Vec<QuestionRef>,
+    quizzes: Vec<QuizRef>,
     reference: Vec<Question>,
     rng: ThreadRng,
 }
 
-impl<'a> QuizDispatcher<'a> {
+// FIXME: Should this use the builder pattern?
+impl QuizDispatcher {
     /// Set the list of `Question`'s to ask and `Quiz`'s to be dispatched
-    pub fn new(questions: &'a [QuestionRef], quizzes: &'a [QuizRef]) -> Self {
+    pub fn new(questions: Vec<QuestionRef>) -> Self {
         // FIXME: Add some explanations
         let reference = questions
             .iter()
-            .map(|rc| (**rc).clone().into_inner())
+            .map(|rc| RefCell::clone(&**rc).into_inner()) // ALT: (**rc).clone()
             .collect();
         let rng = thread_rng();
         Self {
             questions,
-            quizzes,
+            quizzes: Vec::new(), // Ew
             reference,
             rng,
         }
+    }
+
+    // FIXME: I'm not sure how I feel about this...
+    pub fn register_quiz(&mut self, quiz: impl Quiz + 'static) {
+        self.quizzes.push(Rc::new(RefCell::new(Box::new(quiz))));
     }
 
     /// Sorts `Question`s by mastery, then dispatches a random `Quiz` if one
@@ -61,7 +68,7 @@ impl<'a> QuizDispatcher<'a> {
 
     /// Returns the number of questions remaining and the current score as a
     /// percentage
-    pub fn progress(&self) -> (usize, f64) {
+    pub fn progress(&self) -> Progress {
         // FIXME: Put actual logic here
         (42, 33.3)
     }

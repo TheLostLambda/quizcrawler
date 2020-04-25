@@ -1,5 +1,5 @@
 use crate::core::data::Section;
-use crate::core::quiz::Quiz;
+use crate::core::quiz::{MultipleChoice, Progress, QuizDispatcher, QuizRef};
 use crossterm::event::KeyCode;
 use std::collections::HashMap;
 
@@ -14,7 +14,6 @@ pub struct Quizcrawler {
     pub tree: Section,
     pub options: QCOptions,
     pub state_stack: Vec<State>,
-    // pub games: Vec<Box<dyn Quiz>>, // FIXME: Does this actually serve any purpose?
 }
 
 #[derive(Default)]
@@ -33,8 +32,11 @@ impl TreeState {
     }
 }
 
+// FIXME: This could use some more thought
 pub enum State {
     TreeView(TreeState),
+    Dispatch(QuizDispatcher),
+    AskQuestion(QuizRef, Progress),
 }
 
 impl Quizcrawler {
@@ -42,7 +44,6 @@ impl Quizcrawler {
         Self {
             tree,
             options,
-            //games: Vec::new(),
             state_stack: vec![State::TreeView(Default::default())],
         }
     }
@@ -63,10 +64,32 @@ impl Quizcrawler {
                     KeyCode::Right if node.children[current].is_parent() => {
                         state.path.push(child_names[current].to_owned())
                     }
+                    // FIXME: This feels a tad muddled
+                    KeyCode::Right => {
+                        let mut path = state.path.clone();
+                        path.push(child_names[current].to_owned());
+                        // FIXME: unwrap is likely a bad idea here
+                        let questions = &self.tree.child_at_path(&path).unwrap().questions;
+                        let mut dispatcher = QuizDispatcher::new(questions.to_vec());
+                        dispatcher.register_quiz(MultipleChoice::default());
+                        self.state_stack.push(State::Dispatch(dispatcher))
+                    }
                     KeyCode::Left => {
                         state.path.pop();
                     }
                     _ => {}
+                }
+            }
+            // FIXME: Move this to a non-input loop
+            Some(State::Dispatch(dispatcher)) => {
+                match dispatcher.next() {
+                    Some(quiz) => {
+                        let progress = dispatcher.progress();
+                        self.state_stack.push(State::AskQuestion(quiz, progress));
+                    }
+                    None => {
+                        self.state_stack.pop();
+                    }
                 }
             }
             _ => {}

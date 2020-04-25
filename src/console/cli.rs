@@ -42,18 +42,21 @@ pub fn run() -> Result<(), Box<dyn Error>> {
     use crate::core::quiz::*;
     use std::{cell::RefCell, rc::Rc};
 
-    // FIXME: Put me somewhere appropriate
-    fn into_quiz<'a>(quiz: impl Quiz + 'a) -> Rc<RefCell<Box<dyn Quiz + 'a>>> {
+    let questions = tree.child_at_path(&["Scratch"]).unwrap().questions.clone();
+    dbg!(questions.len());
+
+    // Old system
+    /* fn into_quiz(quiz: impl Quiz + 'static) -> QuizRef {
         Rc::new(RefCell::new(Box::new(quiz)))
     }
 
-    // FIXME: Write an impl for Into / From so MultipleChoice.into() is valid
     let quizzes = vec![into_quiz(MultipleChoice::default())];
-    let questions = tree.child_at_path(&["Scratch"]).unwrap().questions.clone();
-    use ron::ser::{to_string_pretty, PrettyConfig};
-    // dbg!(to_string_pretty(&tree, PrettyConfig::default()));
-    dbg!(questions.len());
-    let mut dispatcher = QuizDispatcher::new(&questions, &quizzes);
+    let mut dispatcher = QuizDispatcher::new(&questions, quizzes); */
+
+    // New system
+    let mut dispatcher = QuizDispatcher::new(questions);
+    dispatcher.register_quiz(MultipleChoice::default());
+
     if let Some(quiz) = dispatcher.next() {
         dbg!(quiz.borrow().ask());
     } else {
