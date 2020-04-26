@@ -1,4 +1,4 @@
-use crate::core::logic;
+use super::logic;
 use serde::{Deserialize, Serialize};
 use std::{cell::RefCell, rc::Rc, time::SystemTime};
 

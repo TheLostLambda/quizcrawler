@@ -1,4 +1,4 @@
-use crate::core::data::Strictness;
+use super::data::Strictness;
 
 /// This will eventually take many different strictness values and determine if
 /// two strings are close enough to be considered the same.

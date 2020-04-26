@@ -1,11 +1,6 @@
-use crate::core::data::{Question, QuestionRef, QuestionVariant};
-use rand::prelude::*;
-use rand::seq::{IteratorRandom, SliceRandom};
-use std::{
-    borrow::Borrow,
-    cell::{RefCell, RefMut},
-    rc::Rc,
-};
+use super::data::{Question, QuestionRef, QuestionVariant};
+use rand::{prelude::*, seq::IteratorRandom};
+use std::{cell::RefCell, rc::Rc};
 
 // FIXME: Add some explanations
 pub type QuizRef = Rc<RefCell<Box<dyn Quiz>>>;
@@ -132,7 +127,6 @@ impl Quiz for MultipleChoice {
         self.context = ctx;
     }
 
-    // Pass in a printing closure: ask(&self, Question -> ()) [Prolly not]
     fn ask(&self) -> String {
         // Should I use an if-let here?
         match self.question {

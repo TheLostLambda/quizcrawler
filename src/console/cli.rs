@@ -1,15 +1,8 @@
-use crate::console::data::Quizcrawler;
-use crate::console::util;
+use super::{data::Quizcrawler, util};
 use crate::crawler::data::Crawler;
 use crossterm::event::{self, Event, KeyCode::Char};
-use crossterm::{terminal, ExecutableCommand};
-use std::error::Error;
-use std::fs;
-use std::io::{self, Write};
+use std::{error::Error, fs};
 use structopt::StructOpt;
-use tui::backend::CrosstermBackend;
-use tui::widgets::{Block, Borders, Widget};
-use tui::Terminal;
 // Tend to these imports! ^
 
 // Interaction in this file!
@@ -42,6 +35,7 @@ pub fn run() -> Result<(), Box<dyn Error>> {
     let mut quizcrawler = Quizcrawler::new(Default::default(), tree);
 
     loop {
+        quizcrawler.tick();
         tui.draw(|mut f| quizcrawler.render(&mut f))?;
         match event::read()? {
             Event::Key(key) if key.code == Char('q') => break,

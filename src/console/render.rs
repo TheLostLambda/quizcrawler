@@ -1,12 +1,13 @@
-use crate::console::data::*;
-use crate::console::util::*;
-use crate::core::data::Section;
+use super::{data::*, util::*};
+use crate::core::{
+    data::Section,
+    // FIXME: Do I want this in this file? Maybe I need a type synonym file...
+    quiz::{Progress, QuizRef},
+};
 use tui::{
     symbols::line,
     widgets::{Block, BorderType, Borders, List, ListState, Paragraph, Text},
 };
-// FIXME: Do I want this in this file? Maybe I need a type synonym file...
-use crate::core::quiz::{Progress, QuizRef};
 
 // FIXME: Good lord, this file needs some cleaning...
 

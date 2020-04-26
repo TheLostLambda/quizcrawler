@@ -1,5 +1,7 @@
-use crate::core::data::Section;
-use crate::core::quiz::{MultipleChoice, Progress, QuizDispatcher, QuizRef};
+use crate::core::{
+    data::Section,
+    quiz::{MultipleChoice, Progress, QuizDispatcher, QuizRef},
+};
 use crossterm::event::KeyCode;
 use std::collections::HashMap;
 
@@ -80,7 +82,12 @@ impl Quizcrawler {
                     _ => {}
                 }
             }
-            // FIXME: Move this to a non-input loop
+            _ => {}
+        }
+    }
+
+    pub fn tick(&mut self) {
+        match self.state_stack.last_mut() {
             Some(State::Dispatch(dispatcher)) => match dispatcher.next() {
                 Some(quiz) => {
                     let progress = dispatcher.progress();

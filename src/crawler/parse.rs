@@ -1,9 +1,7 @@
-use super::data::Crawler;
-use super::util;
+use super::{data::Crawler, util};
 use crate::core::data::*;
 use onig::Regex;
-use std::fs;
-use std::path::Path;
+use std::{fs, path::Path};
 
 impl Crawler {
     /// Parse flashcards from str

@@ -5,6 +5,7 @@ mod crawler;
 use crate::console::cli;
 
 fn main() {
-    // I should define a custom error type to bundle in more information.
-    cli::run().unwrap();
+    if let Err(e) = cli::run() {
+        eprintln!("Program died with error: {}", e);
+    }
 }
