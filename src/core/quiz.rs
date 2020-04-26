@@ -4,7 +4,7 @@ use std::{cell::RefCell, rc::Rc};
 
 // FIXME: Add some explanations
 pub type QuizRef = Rc<RefCell<Box<dyn Quiz>>>;
-pub type Progress = (usize, f64);
+pub type Progress = (usize, f64); // FIXME: This should be a struct
 
 // type QuestionCell = Rc<RefCell<Question>>
 // ^ Make
@@ -23,7 +23,7 @@ impl QuizDispatcher {
         // FIXME: Add some explanations
         let reference = questions
             .iter()
-            .map(|rc| RefCell::clone(&**rc).into_inner()) // ALT: (**rc).clone()
+            .map(|rc| RefCell::clone(rc).into_inner())
             .collect();
         let rng = thread_rng();
         Self {
@@ -43,7 +43,7 @@ impl QuizDispatcher {
     /// percentage
     pub fn progress(&self) -> Progress {
         // FIXME: Put actual logic here
-        (42, 33.3)
+        (self.questions.len(), 0.0)
     }
 }
 
@@ -60,14 +60,14 @@ impl Iterator for QuizDispatcher {
             .iter()
             .cloned()
             .filter(|qz| {
-                let qz = (**qz).borrow();
-                qz.is_applicable(&(*question).borrow())
+                let qz = qz.borrow();
+                qz.is_applicable(&question.borrow())
             })
             .choose(&mut self.rng)?;
         {
             let mut quiz = quiz.borrow_mut();
-            quiz.set_question(question);
             quiz.set_context(self.questions.to_vec());
+            quiz.set_question(question);
         }
         Some(quiz)
     }
@@ -98,11 +98,21 @@ pub trait Quiz {
 
 // FIXME: I should be consistent here and cli.rs with Options vs Config (naming)
 
-#[derive(Default)]
 pub struct MCConfig {
-    /// Sets whether `Term`'s should have their terms and definitions flipped
+    /// Whether `Term`'s should have their terms and definitions flipped
     pub flipped: bool,
-    // Add number of choices & choice numbering
+    /// The number of answer choices for each question
+    pub choices: usize,
+    // Add choice numbering method? ABC vs 123, etc
+}
+
+impl Default for MCConfig {
+    fn default() -> Self {
+        Self {
+            flipped: false,
+            choices: 4,
+        }
+    }
 }
 
 #[derive(Default)]
@@ -110,20 +120,29 @@ pub struct MultipleChoice {
     pub config: MCConfig,
     pub question: Option<QuestionRef>,
     pub context: Vec<QuestionRef>,
-    choices: Vec<usize>,
+    choices: Vec<QuestionRef>,
+    rng: ThreadRng,
 }
 
 impl MultipleChoice {
     pub fn new(config: MCConfig) -> Self {
         Self {
             config,
-            ..Default::default()
+            ..Self::default()
         }
     }
 }
 
 impl Quiz for MultipleChoice {
     fn set_question(&mut self, q: QuestionRef) {
+        self.choices = self
+            .context
+            .clone()
+            .into_iter()
+            .filter(|cq| *cq.borrow() != *q.borrow())
+            .choose_multiple(&mut self.rng, self.config.choices - 1);
+        self.choices.push(q.clone());
+        self.choices.shuffle(&mut self.rng);
         self.question = Some(q);
     }
 
@@ -131,16 +150,19 @@ impl Quiz for MultipleChoice {
         self.context = ctx;
     }
 
+    // FIXME: Should this return a Cow<'static, str>?
     fn ask(&self) -> String {
-        // Should I use an if-let here?
         match self.question {
-            Some(ref q) => (**q).borrow().ask().to_string(), // Ew
+            Some(ref q) => q.borrow().ask().to_string(),
             None => String::new(),
         }
     }
 
     fn get_choices(&self) -> Vec<String> {
-        todo!()
+        self.choices
+            .iter()
+            .map(|q| q.borrow().peek().to_string())
+            .collect()
     }
 
     fn get_hint(&mut self) {
@@ -162,75 +184,3 @@ impl Quiz for MultipleChoice {
         }
     }
 }
-
-/* fn choices(&self) -> Vec<&Question> {
-    self.choices
-        .iter()
-        .map(|&idx| &self.context[idx])
-        .collect()
-} */
-
-/* impl Game for MultipleChoice<'_> {
-    fn progress(&self) -> (usize, i32, f64) {
-        let score = f64::from(self.correct) / self.seen as f64 * 100.0;
-        (self.questions.len(), self.seen, score)
-    }
-
-    fn next_question(&mut self) -> Option<&str> {
-        let len = self.questions.len();
-        if len == 0 {
-            return None;
-        }
-        self.idx = self.rng.gen_range(0, len);
-        self.seen += 1;
-        let mut rng = self.rng;
-        let mut choices: Vec<_> = (0..self.questions.len())
-            .filter(|&c| c != self.idx)
-            .choose_multiple(&mut rng, 3); // The config should determine the number of choices here
-        choices.push(self.idx);
-        choices.shuffle(&mut self.rng);
-        self.choices = choices;
-        Some(self.current().ask())
-    }
-
-    fn get_choices(&self) -> Vec<&str> {
-        self.choices().iter().map(|q| q.peek()).collect()
-    }
-
-    fn get_hint(&mut self) -> Vec<&str> {
-        let mut rng = self.rng;
-        let n = self.choices.len();
-        // Cheap clone... Find a better way...
-        let mut choices = self
-            .choices
-            .clone()
-            .into_iter()
-            .filter(|&c| c != self.idx)
-            .choose_multiple(&mut rng, n - 2);
-        choices.push(self.idx);
-        choices.shuffle(&mut rng);
-        self.choices = choices;
-        self.get_choices()
-    }
-
-    fn answer(&mut self, ans: &str) -> (bool, String) {
-        let idx: usize = ans.parse().unwrap();
-        let ans_str = self.choices()[idx].peek().to_owned();
-        let (correct, right_ans) = self.current().answer(&ans_str);
-        if correct {
-            // self.correct += 1;
-            // FIXME: What to do when questions are complete?
-            //self.questions.remove(self.idx);
-        }
-        (correct, right_ans.to_owned())
-    }
-
-    fn i_was_right(&mut self) {
-        self.correct += 1;
-        self.current().override_correct();
-        // ^ This gets thrown away below...
-        // FIXME: What to do when questions are complete?
-        //self.questions.remove(self.idx);
-    }
-}
- */

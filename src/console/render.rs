@@ -8,7 +8,6 @@ use tui::{
     symbols::line,
     widgets::{Block, BorderType, Borders, List, ListState, Paragraph, Text},
 };
-
 // FIXME: Good lord, this file needs some cleaning...
 
 impl Quizcrawler {
@@ -41,13 +40,25 @@ impl Quizcrawler {
 
     fn ask_question(&self, quiz: &QuizRef, progress: &Progress, f: &mut Frame) {
         let size = f.size();
+        // FIXME: These messages need some refining
         let title = render_titlebar(
-            "Left".to_string(),
+            format!("{} questions to go!", progress.0),
             line::HORIZONTAL,
-            "Right".to_string(),
+            if progress.1 > 0.0 {
+                format!("Your score is {:.2}%", progress.1)
+            } else {
+                String::new()
+            },
             size.width,
         );
-        let text = [Text::raw("Howdy")];
+        let mut text = vec![Text::raw(format!("{}\n\n", quiz.borrow().ask()))];
+        let choices = quiz
+            .borrow()
+            .get_choices()
+            .into_iter()
+            .enumerate()
+            .map(|(i, q)| Text::raw(format!("{}) {}\n", i + 1, q)));
+        text.extend(choices);
         let list = Paragraph::new(text.iter()).block(
             Block::default()
                 .title(&title)
