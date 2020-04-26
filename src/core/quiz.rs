@@ -39,9 +39,20 @@ impl QuizDispatcher {
         self.quizzes.push(Rc::new(RefCell::new(Box::new(quiz))));
     }
 
+    /// Returns the number of questions remaining and the current score as a
+    /// percentage
+    pub fn progress(&self) -> Progress {
+        // FIXME: Put actual logic here
+        (42, 33.3)
+    }
+}
+
+impl Iterator for QuizDispatcher {
+    type Item = QuizRef;
+
     /// Sorts `Question`s by mastery, then dispatches a random `Quiz` if one
     /// is available
-    pub fn next(&mut self) -> Option<QuizRef> {
+    fn next(&mut self) -> Option<QuizRef> {
         // FIXME: Implement priority sorting and end the quiz after mastery
         let question = self.questions.iter().cloned().choose(&mut self.rng)?;
         let quiz = self
@@ -59,13 +70,6 @@ impl QuizDispatcher {
             quiz.set_context(self.questions.to_vec());
         }
         Some(quiz)
-    }
-
-    /// Returns the number of questions remaining and the current score as a
-    /// percentage
-    pub fn progress(&self) -> Progress {
-        // FIXME: Put actual logic here
-        (42, 33.3)
     }
 }
 

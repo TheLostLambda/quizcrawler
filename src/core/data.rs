@@ -35,7 +35,7 @@ impl Section {
         let mut current = self;
         for name in path {
             // FIXME: What happens when there are sections with the same name?
-            current = current.children.iter().find(|c| &c.name == name.as_ref())?;
+            current = current.children.iter().find(|c| c.name == name.as_ref())?;
         }
         Some(current)
     }

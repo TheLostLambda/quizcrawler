@@ -46,7 +46,7 @@ impl Quizcrawler {
         Self {
             tree,
             options,
-            state_stack: vec![State::TreeView(Default::default())],
+            state_stack: vec![State::TreeView(TreeState::default())],
         }
     }
 

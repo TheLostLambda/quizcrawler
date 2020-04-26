@@ -1,4 +1,7 @@
-use super::{data::Quizcrawler, util};
+use super::{
+    data::{QCOptions, Quizcrawler},
+    util,
+};
 use crate::crawler::data::Crawler;
 use crossterm::event::{self, Event, KeyCode::Char};
 use std::{error::Error, fs};
@@ -32,7 +35,7 @@ pub fn run() -> Result<(), Box<dyn Error>> {
 
     let mut tui = util::setup_tui()?;
 
-    let mut quizcrawler = Quizcrawler::new(Default::default(), tree);
+    let mut quizcrawler = Quizcrawler::new(QCOptions::default(), tree);
 
     loop {
         quizcrawler.tick();
