@@ -14,7 +14,7 @@ impl Quizcrawler {
     pub fn render(&self, f: &mut Frame) {
         match self.state_stack.last() {
             Some(State::TreeView(s)) => self.tree_view(&s, f),
-            Some(State::AskQuestion(q, p)) => self.ask_question(&q, p, f),
+            Some(State::AskQuestion(s)) => self.ask_question(&s.quiz, &s.progress, f),
             _ => {}
         }
     }
@@ -59,12 +59,14 @@ impl Quizcrawler {
             .enumerate()
             .map(|(i, q)| Text::raw(format!("{}) {}\n", i + 1, q)));
         text.extend(choices);
-        let list = Paragraph::new(text.iter()).block(
-            Block::default()
-                .title(&title)
-                .borders(Borders::ALL)
-                .border_type(BorderType::Rounded),
-        );
+        let list = Paragraph::new(text.iter())
+            .block(
+                Block::default()
+                    .title(&title)
+                    .borders(Borders::ALL)
+                    .border_type(BorderType::Rounded),
+            )
+            .wrap(true);
         f.render_widget(list, size);
     }
 }

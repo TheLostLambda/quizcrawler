@@ -7,9 +7,9 @@ leverages spaced repetition and forced / active recall to enhance learning. The
 gamification of studying should further increase engagement and recall.
 
 ## What am I doing now?
-  1. Add states for answering questions
+  1. Add state for showing right / wrong answer
   2. Finishing Quiz implementation
-  3. UI scrolling and jump into quiz options
+  3. Ability to jump into a quiz
   4. Basic Persistence
   5. Fix MC (Similarity + Diminishing Options)
 
@@ -50,8 +50,8 @@ gamification of studying should further increase engagement and recall.
       - [ ] TOML File
     - [ ] Record / save quiz progress
       - [ ] Save "sessions" (which question was I on?)
-    - [ ] Record how many times a question was answered correctly & incorrectly
-      - [ ] Have a single "mastery" number (higher -> less asked)
+    - [x] Record how many times a question was answered correctly & incorrectly
+      - [x] Have a single "mastery" number (higher -> less asked)
     - [ ] Record the last time questions were asked
     - [ ] Store which types of question each bit of info best fits with
       - [ ] Quiz type preference

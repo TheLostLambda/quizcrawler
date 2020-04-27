@@ -59,14 +59,18 @@ impl Iterator for QuizDispatcher {
             .quizzes
             .iter()
             .cloned()
-            .filter(|qz| {
-                let qz = qz.borrow();
-                qz.is_applicable(&question.borrow())
-            })
+            .filter(|qz| qz.borrow().is_applicable(&question.borrow()))
             .choose(&mut self.rng)?;
+        // Make sure that all contextual questions are supported as well
+        let context = self
+            .questions
+            .iter()
+            .cloned()
+            .filter(|q| quiz.borrow().is_applicable(&q.borrow()))
+            .collect();
         {
             let mut quiz = quiz.borrow_mut();
-            quiz.set_context(self.questions.to_vec());
+            quiz.set_context(context);
             quiz.set_question(question);
         }
         Some(quiz)
@@ -86,9 +90,9 @@ pub trait Quiz {
     fn get_choices(&self) -> Vec<String>;
     /// Mutates the internal state so that a hint is provided by other calls
     fn get_hint(&mut self);
-    /// Takes a user answer in the form of a `&str`, returning if it was
-    /// correct and what the right answer was
-    fn answer(&mut self, ans: &str) -> (bool, String);
+    /// Takes a user answer in the form of a `&str` and if it's valid, returns
+    /// if it was correct and what the right answer was
+    fn answer(&mut self, ans: &str) -> Option<(bool, String)>;
     /// Override the previous answer, marking it as correct
     fn i_was_right(&mut self);
     /// Checks which `QuestionVariant` is in `Question`, returning if this quiz
@@ -169,8 +173,17 @@ impl Quiz for MultipleChoice {
         todo!()
     }
 
-    fn answer(&mut self, ans: &str) -> (bool, String) {
-        todo!()
+    fn answer(&mut self, ans: &str) -> Option<(bool, String)> {
+        let n: usize = ans.parse().ok()?;
+        let choices = self.get_choices();
+        match self.question {
+            Some(ref q) if 0 < n && n <= choices.len() => {
+                let mut q = q.borrow_mut();
+                let (correct, answer) = q.answer(&choices[n - 1]);
+                Some((correct, answer.to_string()))
+            }
+            _ => None,
+        }
     }
 
     fn i_was_right(&mut self) {

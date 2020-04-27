@@ -34,11 +34,18 @@ impl TreeState {
     }
 }
 
+#[derive(Clone)]
+pub struct QuestionState {
+    pub quiz: QuizRef,
+    pub progress: Progress,
+}
+
 // FIXME: This could use some more thought
 pub enum State {
     TreeView(TreeState),
     Dispatch(QuizDispatcher),
-    AskQuestion(QuizRef, Progress),
+    AskQuestion(QuestionState),
+    AnswerQuestion(QuestionState, (bool, String)), // FIXME: Ew
 }
 
 impl Quizcrawler {
@@ -57,8 +64,8 @@ impl Quizcrawler {
                 let node = self.tree.child_at_path(&state.path).unwrap(); // FIXME: Unwrap
                 let child_names: Vec<_> = node.children.iter().map(|x| &x.name).collect();
                 let limit = child_names.len() - 1;
-                // This gives me an entry, a mutable reference which is updated in the match
                 let current = state.get_selected();
+                // This gives me an entry, a mutable reference which is updated in the match
                 let selector = state.get_selected_mut();
                 match key {
                     KeyCode::Up if current > 0 => *selector -= 1,
@@ -82,6 +89,21 @@ impl Quizcrawler {
                     _ => {}
                 }
             }
+            Some(State::AskQuestion(state)) => {
+                if !state.quiz.borrow().get_choices().is_empty() {
+                    if let KeyCode::Char(c) = key {
+                        let result = state.quiz.borrow_mut().answer(&c.to_string());
+                        if let Some(result) = result {
+                            let state = state.clone();
+                            self.state_stack.pop();
+                            self.state_stack.push(State::AnswerQuestion(state, result))
+                        }
+                    }
+                }
+            }
+            Some(State::AnswerQuestion(_, _)) => {
+                self.state_stack.pop();
+            }
             _ => {}
         }
     }
@@ -91,7 +113,8 @@ impl Quizcrawler {
             Some(State::Dispatch(dispatcher)) => match dispatcher.next() {
                 Some(quiz) => {
                     let progress = dispatcher.progress();
-                    self.state_stack.push(State::AskQuestion(quiz, progress));
+                    let state = QuestionState { quiz, progress };
+                    self.state_stack.push(State::AskQuestion(state));
                 }
                 None => {
                     self.state_stack.pop();
