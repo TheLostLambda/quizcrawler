@@ -4,10 +4,14 @@ use std::{cell::RefCell, rc::Rc};
 
 // FIXME: Add some explanations
 pub type QuizRef = Rc<RefCell<Box<dyn Quiz>>>;
-pub type Progress = (usize, f64); // FIXME: This should be a struct
 
-// type QuestionCell = Rc<RefCell<Question>>
-// ^ Make
+// FIXME: Where do I belong?
+#[derive(Clone, Copy)]
+pub struct Progress {
+    pub questions: usize,
+    pub learned: usize,
+    pub score: f64,
+}
 
 pub struct QuizDispatcher {
     questions: Vec<QuestionRef>,
@@ -43,7 +47,11 @@ impl QuizDispatcher {
     /// percentage
     pub fn progress(&self) -> Progress {
         // FIXME: Put actual logic here
-        (self.questions.len(), 0.0)
+        Progress {
+            questions: self.questions.len(),
+            learned: 0,
+            score: 0.0,
+        }
     }
 }
 
