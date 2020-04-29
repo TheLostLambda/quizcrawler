@@ -1,6 +1,6 @@
 use super::data::{Question, QuestionRef, QuestionVariant};
 use rand::{prelude::*, seq::IteratorRandom};
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, cmp::Ordering, collections::HashSet, rc::Rc};
 
 // FIXME: Add some explanations
 pub type QuizRef = Rc<RefCell<Box<dyn Quiz>>>;
@@ -13,10 +13,12 @@ pub struct Progress {
     pub score: f64,
 }
 
+// FIXME: Add QDOptions. Change MCConfig to MCOptions
+
 pub struct QuizDispatcher {
     questions: Vec<QuestionRef>,
     quizzes: Vec<QuizRef>,
-    reference: Vec<Question>,
+    reference: HashSet<Question>,
     rng: ThreadRng,
 }
 
@@ -32,7 +34,7 @@ impl QuizDispatcher {
         let rng = thread_rng();
         Self {
             questions,
-            quizzes: Vec::new(), // Ew
+            quizzes: Vec::new(),
             reference,
             rng,
         }
@@ -43,15 +45,26 @@ impl QuizDispatcher {
         self.quizzes.push(Rc::new(RefCell::new(Box::new(quiz))));
     }
 
-    /// Returns the number of questions remaining and the current score as a
-    /// percentage
+    /// Returns the number of questions in the set, how many have been learned,
+    /// and the current score as a percentage
     pub fn progress(&self) -> Progress {
         // FIXME: Put actual logic here
         Progress {
             questions: self.questions.len(),
             learned: 0,
-            score: 0.0,
+            score: -1.0,
         }
+    }
+
+    fn remaining_questions(&self) -> Vec<QuestionRef> {
+        todo!()
+    }
+
+    // FIXME: This needs to compare deltas from the reference
+    fn delta_cmp(&self, a: QuestionRef, b: QuestionRef) -> Ordering {
+        let (am, bm) = (a.borrow().mastery, b.borrow().mastery);
+        // Lower mastery first
+        am.cmp(&bm).reverse()//.then(...)
     }
 }
 
@@ -70,7 +83,7 @@ impl Iterator for QuizDispatcher {
             .filter(|qz| qz.borrow().is_applicable(&question.borrow()))
             .choose(&mut self.rng)?;
         // Make sure that all contextual questions are supported as well
-        let context = self
+        let context: Vec<_> = self
             .questions
             .iter()
             .cloned()
@@ -78,7 +91,8 @@ impl Iterator for QuizDispatcher {
             .collect();
         {
             let mut quiz = quiz.borrow_mut();
-            quiz.set_context(context);
+            // FIXME: Should this just take a Vec<QuestionRef> directly?
+            quiz.set_context(&context[..]);
             quiz.set_question(question);
         }
         Some(quiz)
@@ -89,13 +103,13 @@ pub trait Quiz {
     /// Sets the `Question` to be asked
     fn set_question(&mut self, q: QuestionRef);
     /// Sets the context (a list of `Questions`) that this Quiz belongs in
-    fn set_context(&mut self, ctx: Vec<QuestionRef>);
+    fn set_context(&mut self, ctx: &[QuestionRef]);
     /// Ask the `Question`, returning a `String` to be displayed. This returns
     /// a `String`, not a `&str`, so quizzes can do formatting on the question
     /// string before it's passed to the console
     fn ask(&self) -> String;
     /// Returns a list of possible answers as `String`'s to be displayed
-    fn get_choices(&self) -> Vec<String>;
+    fn get_choices(&self) -> &[String];
     /// Mutates the internal state so that a hint is provided by other calls
     fn get_hint(&mut self);
     /// Takes a user answer in the form of a `&str` and if it's valid, returns
@@ -132,7 +146,7 @@ pub struct MultipleChoice {
     pub config: MCConfig,
     pub question: Option<QuestionRef>,
     pub context: Vec<QuestionRef>,
-    choices: Vec<QuestionRef>,
+    choices: Vec<String>,
     rng: ThreadRng,
 }
 
@@ -147,19 +161,23 @@ impl MultipleChoice {
 
 impl Quiz for MultipleChoice {
     fn set_question(&mut self, q: QuestionRef) {
-        self.choices = self
+        let answer = q.borrow().peek().to_string();
+        let answer_bank: HashSet<_> = self
             .context
-            .clone()
+            .iter()
+            .map(|q| q.borrow().peek().to_string())
+            .collect();
+        self.choices = answer_bank
             .into_iter()
-            .filter(|cq| *cq.borrow() != *q.borrow())
+            .filter(|s| s != &answer)
             .choose_multiple(&mut self.rng, self.config.choices - 1);
-        self.choices.push(q.clone());
+        self.choices.push(answer);
         self.choices.shuffle(&mut self.rng);
         self.question = Some(q);
     }
 
-    fn set_context(&mut self, ctx: Vec<QuestionRef>) {
-        self.context = ctx;
+    fn set_context(&mut self, ctx: &[QuestionRef]) {
+        self.context = ctx.to_vec();
     }
 
     // FIXME: Should this return a Cow<'static, str>?
@@ -170,11 +188,8 @@ impl Quiz for MultipleChoice {
         }
     }
 
-    fn get_choices(&self) -> Vec<String> {
-        self.choices
-            .iter()
-            .map(|q| q.borrow().peek().to_string())
-            .collect()
+    fn get_choices(&self) -> &[String] {
+        &self.choices[..]
     }
 
     fn get_hint(&mut self) {
@@ -195,7 +210,9 @@ impl Quiz for MultipleChoice {
     }
 
     fn i_was_right(&mut self) {
-        todo!()
+        if let Some(ref q) = self.question {
+            q.borrow_mut().override_correct()
+        }
     }
 
     fn is_applicable(&self, q: &Question) -> bool {

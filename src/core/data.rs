@@ -1,6 +1,11 @@
 use super::logic;
 use serde::{Deserialize, Serialize};
-use std::{cell::RefCell, rc::Rc, time::SystemTime};
+use std::{
+    cell::RefCell,
+    hash::{Hash, Hasher},
+    rc::Rc,
+    time::SystemTime,
+};
 
 // FIXME: Add some explanations
 pub type QuestionRef = Rc<RefCell<Question>>;
@@ -180,6 +185,17 @@ impl PartialEq for Question {
         match (&self.data, &other.data) {
             (QuestionVariant::Term(s), QuestionVariant::Term(o)) => s.term == o.term,
             _ => false,
+        }
+    }
+}
+
+impl Eq for Question {}
+
+impl Hash for Question {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        match &self.data {
+            QuestionVariant::Term(s) => s.term.hash(state),
+            _ => {}
         }
     }
 }

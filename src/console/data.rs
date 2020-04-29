@@ -101,9 +101,16 @@ impl Quizcrawler {
                     }
                 }
             }
-            Some(State::AnswerQuestion(_, _)) => {
-                self.state_stack.pop();
-            }
+            Some(State::AnswerQuestion(state, (correct, _))) => match key {
+                KeyCode::Char('o') if !*correct => {
+                    state.quiz.borrow_mut().i_was_right();
+                    *correct = true;
+                }
+                KeyCode::Enter | KeyCode::Char(' ') => {
+                    self.state_stack.pop();
+                }
+                _ => {}
+            },
             _ => {}
         }
     }

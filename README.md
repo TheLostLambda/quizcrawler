@@ -7,7 +7,7 @@ leverages spaced repetition and forced / active recall to enhance learning. The
 gamification of studying should further increase engagement and recall.
 
 ## What am I doing now?
-  1. Clean up the code for AnswerQuestion state
+  1. Stateful ordering of questions
   2. Finishing Quiz implementation
   3. Ability to jump into a quiz
   4. Basic Persistence

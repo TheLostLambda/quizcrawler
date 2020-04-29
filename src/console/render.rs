@@ -16,9 +16,7 @@ impl Quizcrawler {
         match self.state_stack.last() {
             Some(State::TreeView(s)) => tree_view(&self.tree, &s, f),
             Some(State::AskQuestion(s)) => question_view(&s.quiz, &s.progress, None, f),
-            Some(State::AnswerQuestion(s, r)) => {
-                question_view(&s.quiz, &s.progress, Some(r.clone()), f) // FIXME: This result stuff is shit
-            }
+            Some(State::AnswerQuestion(s, r)) => question_view(&s.quiz, &s.progress, Some(r), f),
             _ => {}
         }
     }
@@ -42,14 +40,14 @@ fn tree_view(section: &Section, state: &TreeState, f: &mut Frame) {
 fn question_view(
     quiz: &QuizRef,
     progress: &Progress,
-    result: Option<(bool, String)>,
+    result: Option<&(bool, String)>,
     f: &mut Frame,
 ) {
     let size = f.size();
     // FIXME: These messages need some refining
     let title = progress_titlebar(progress, size.width);
     let mut text = print_question(&quiz);
-    if let Some((correct, ref answer)) = result {
+    if let Some(&(correct, ref answer)) = result {
         text.extend(print_answer(correct, answer));
     } else {
         text.extend(print_choices(&quiz))
@@ -67,7 +65,7 @@ fn print_question(quiz: &QuizRef) -> Vec<Text> {
 fn print_choices(quiz: &QuizRef) -> Vec<Text> {
     quiz.borrow()
         .get_choices()
-        .into_iter()
+        .iter()
         .enumerate()
         .map(|(i, q)| Text::raw(format!("{}) {}\n", i + 1, q)))
         .collect()
@@ -75,22 +73,26 @@ fn print_choices(quiz: &QuizRef) -> Vec<Text> {
 
 fn print_answer(correct: bool, answer: &str) -> Vec<Text> {
     let answer_string = format!(", the answer is: {}", answer);
+    let continue_string = "ENTER or SPACE to continue";
     let correct_style = Style::default().modifier(Modifier::BOLD).fg(Color::Green);
     let wrong_style = correct_style.fg(Color::Red);
     if correct {
-        vec![Text::styled(
-            format!("Well done{}", answer_string),
-            correct_style,
-        )]
+        vec![
+            Text::styled(format!("Well done{}\n", answer_string), correct_style),
+            Text::raw(format!("{}...", continue_string)),
+        ]
     } else {
-        vec![Text::styled(format!("Sorry{}", answer_string), wrong_style)]
+        vec![
+            Text::styled(format!("Sorry{}\n", answer_string), wrong_style),
+            Text::raw(format!("{}, 'o' for manual override...", continue_string)),
+        ]
     }
 }
 
 // FIXME: This should also shorten the path when it gets too long
-fn tree_titlebar(root: &str, rest: &Vec<String>, selected: &Section, width: u16) -> String {
+fn tree_titlebar(root: &str, rest: &[String], selected: &Section, width: u16) -> String {
     let mut path = vec![root.to_owned()];
-    path.extend(rest.clone());
+    path.extend(rest.to_vec());
     let path = path.join("/");
     // FIXME: This should remove the plural for 1 item (or just not use words)
     let info = format!(
