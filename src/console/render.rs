@@ -5,7 +5,6 @@ use crate::core::{
     quiz::{QuizProgress, QuizRef},
 };
 use tui::{
-    layout::{Constraint, Layout},
     style::{Color, Modifier, Style},
     symbols::line,
     widgets::{Block, BorderType, Borders, List, ListState, Paragraph, Text},
@@ -31,19 +30,10 @@ fn tree_view(section: &Section, state: &TreeState, f: &mut Frame) {
     let mut list_state = ListState::default();
     list_state.select(Some(state.get_selected()));
     let title = tree_titlebar(&section.name, &state.path, selected_node, size.width);
-    let chunks = Layout::default()
-        .constraints([Constraint::Min(0), Constraint::Length(3)].as_ref())
-        .split(size);
     let list = List::new(child_names)
         .block(titled_block(&title))
         .highlight_symbol(">");
-    f.render_stateful_widget(list, chunks[0], &mut list_state);
-    // FIXME: This is some gross code
-    let help_text = [Text::raw(
-        "Use the arrow keys to navigate, press ENTER start a quiz.",
-    )];
-    let help = Paragraph::new(help_text.iter()).block(titled_block("")); // FIXME: titled_block is a bad name (there is no title here)
-    f.render_widget(help, chunks[1]);
+    f.render_stateful_widget(list, size, &mut list_state);
 }
 
 // FIXME: Should that answer type be a struct?
