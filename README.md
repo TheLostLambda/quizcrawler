@@ -8,8 +8,9 @@ gamification of studying should further increase engagement and recall.
 
 ## What am I doing now?
   1. Finishing Quiz implementation
-  2. Basic Persistence
-  3. Fix MC (Similarity + Diminishing Options)
+  2. Add tests for question state changes (mastery, correct, etc)
+  3. Basic Persistence
+  4. Fix MC (Similarity + Diminishing Options)
 
 ## Progress
 ### v0.5.0

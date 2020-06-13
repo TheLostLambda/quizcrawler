@@ -23,7 +23,7 @@ fn test_parse_terms() {
   - in der Zwischenzeit :: [in the] meantime"#;
 
     let cards = crawler().parse_sections(data_str);
-    assert_ron_snapshot!(cards, {".**.atime" => "[atime]"});
+    assert_ron_snapshot!(cards, {".**.last_correct" => "[last_correct]"});
 }
 
 #[test]
@@ -36,7 +36,7 @@ fn test_parse_lists() {
   3) Or perhaps this is the third most expensive solution."#;
 
     let cards = crawler().parse_sections(data_str);
-    assert_ron_snapshot!(cards, {".**.atime" => "[atime]"});
+    assert_ron_snapshot!(cards, {".**.last_correct" => "[last_correct]"});
 }
 
 #[test]
@@ -48,7 +48,7 @@ fn test_parse_bullets() {
   - Definitions and processes have their own structures."#;
 
     let cards = crawler().parse_sections(data_str);
-    assert_ron_snapshot!(cards, {".**.atime" => "[atime]"});
+    assert_ron_snapshot!(cards, {".**.last_correct" => "[last_correct]"});
 }
 
 #[test]
@@ -63,5 +63,5 @@ fn test_parse_multiline_terms() {
 "#;
 
     let cards = crawler().parse_sections(data_str);
-    assert_ron_snapshot!(cards, {".**.atime" => "[atime]"});
+    assert_ron_snapshot!(cards, {".**.last_correct" => "[last_correct]"});
 }

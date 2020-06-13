@@ -35,5 +35,5 @@ fn find_child_at_path() {
     let path = vec!["Topic 2", "Subtopic A"];
     let section = &crawler().parse_sections(data_str)[0];
     let child = section.child_at_path(&path);
-    assert_ron_snapshot!(child, {".**.atime" => "[atime]"});
+    assert_ron_snapshot!(child, {".**.last_correct" => "[last_correct]"});
 }

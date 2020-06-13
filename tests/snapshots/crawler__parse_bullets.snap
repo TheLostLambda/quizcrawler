@@ -12,9 +12,9 @@ expression: cards
         )),
         comp_level: Trimmed,
         mastery: 0,
-        seen: 0,
         correct: 0,
-        atime: "[atime]",
+        seen: 0,
+        last_correct: "[last_correct]",
       ),
       Question(
         data: Bullet(Bullet(
@@ -22,9 +22,9 @@ expression: cards
         )),
         comp_level: Trimmed,
         mastery: 0,
-        seen: 0,
         correct: 0,
-        atime: "[atime]",
+        seen: 0,
+        last_correct: "[last_correct]",
       ),
       Question(
         data: Bullet(Bullet(
@@ -32,9 +32,9 @@ expression: cards
         )),
         comp_level: Trimmed,
         mastery: 0,
-        seen: 0,
         correct: 0,
-        atime: "[atime]",
+        seen: 0,
+        last_correct: "[last_correct]",
       ),
     ],
     children: [],

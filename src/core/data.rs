@@ -60,7 +60,7 @@ pub struct Question {
     pub mastery: u8,            // 0-10 (Leitner System)
     pub correct: usize,
     pub seen: usize,
-    pub atime: SystemTime, // FIXME: Should be the time of the last correct answer!
+    pub last_correct: SystemTime, // FIXME: Should be the time of the last correct answer!
 }
 
 /// Question Enum
@@ -132,7 +132,7 @@ impl Question {
             mastery: 0,
             correct: 0,
             seen: 0,
-            atime: SystemTime::now(),
+            last_correct: SystemTime::now(),
         }
     }
 
@@ -168,14 +168,31 @@ impl Question {
         self.seen += 1;
         if correct {
             self.correct += 1;
+            self.increment_mastery();
+            self.last_correct = SystemTime::now();
+        } else {
+            self.decrement_mastery();
         }
         (correct, self.peek())
     }
 
     pub fn override_correct(&mut self) {
         self.correct += 1;
+        self.increment_mastery();
         if self.correct > self.seen {
             self.correct = self.seen;
+        }
+    }
+
+    fn increment_mastery(&mut self) {
+        if self.mastery < 10 {
+            self.mastery += 1;
+        }
+    }
+
+    fn decrement_mastery(&mut self) {
+        if self.mastery > 0 {
+            self.mastery -= 1;
         }
     }
 }
