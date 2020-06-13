@@ -1,20 +1,28 @@
 use super::data::{Question, QuestionRef, QuestionVariant};
 use rand::{prelude::*, seq::IteratorRandom};
-use std::{cell::RefCell, cmp::Ordering, collections::HashSet, rc::Rc};
+use std::{cell::RefCell, collections::HashSet, rc::Rc};
 
 // FIXME: Add some explanations
 pub type QuizRef = Rc<RefCell<Box<dyn Quiz>>>;
 
 // FIXME: Where do I belong?
 #[derive(Clone, Copy)]
-pub struct Progress {
+pub struct QuizProgress {
     pub questions: usize,
     pub learned: usize,
     pub score: f64,
 }
 
+// FIXME: Where do I belong?
+#[derive(Clone, Copy)]
+pub struct QuestionProgress {
+    pub correct: usize,
+    pub seen: usize,
+}
+
 // FIXME: Add QDOptions. Change MCConfig to MCOptions
 
+// FIXME: Maybe rename to just `Dispatcher`?
 pub struct QuizDispatcher {
     questions: Vec<QuestionRef>,
     quizzes: Vec<QuizRef>,
@@ -47,24 +55,46 @@ impl QuizDispatcher {
 
     /// Returns the number of questions in the set, how many have been learned,
     /// and the current score as a percentage
-    pub fn progress(&self) -> Progress {
+    pub fn progress(&self) -> QuizProgress {
         // FIXME: Put actual logic here
-        Progress {
+        QuizProgress {
             questions: self.questions.len(),
-            learned: 0,
-            score: -1.0,
+            learned: self.questions.len() - self.remaining_questions().len(),
+            score: self.score(),
         }
     }
 
+    // FIXME: Add a configurable mastery threshold for progression
     fn remaining_questions(&self) -> Vec<QuestionRef> {
-        todo!()
+        self.questions
+            .iter()
+            .cloned()
+            .filter(|q| self.question_progress(q).correct < 1)
+            .collect()
     }
 
-    // FIXME: This needs to compare deltas from the reference
-    fn delta_cmp(&self, a: QuestionRef, b: QuestionRef) -> Ordering {
-        let (am, bm) = (a.borrow().mastery, b.borrow().mastery);
-        // Lower mastery first
-        am.cmp(&bm).reverse()//.then(...)
+    // FIXME: Should this return `seen` and `correct` in a struct?
+    fn question_progress(&self, question: &QuestionRef) -> QuestionProgress {
+        let question = question.borrow();
+        // FIXME: Handle this unwrap a bit better
+        let ref_question = self.reference.get(&question).unwrap();
+        let correct = question.correct - ref_question.correct;
+        let seen = question.seen - ref_question.seen;
+        QuestionProgress { correct, seen }
+    }
+
+    fn score(&self) -> f64 {
+        let (mut correct, mut seen) = (0, 0);
+        for q in &self.questions {
+            let progress = self.question_progress(q);
+            correct += progress.correct;
+            seen += progress.seen;
+        }
+        if seen > 0 {
+            (correct as f64 / seen as f64) * 100.0
+        } else {
+            -1.0
+        }
     }
 }
 
@@ -75,7 +105,9 @@ impl Iterator for QuizDispatcher {
     /// is available
     fn next(&mut self) -> Option<QuizRef> {
         // FIXME: Implement priority sorting and end the quiz after mastery
-        let question = self.questions.iter().cloned().choose(&mut self.rng)?;
+        let mut remaining = self.remaining_questions();
+        remaining.sort_unstable_by_key(|q| self.question_progress(q).seen);
+        let question = Rc::clone(remaining.first()?); // This was nicer as .pop()
         let quiz = self
             .quizzes
             .iter()

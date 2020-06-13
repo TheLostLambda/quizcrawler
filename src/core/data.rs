@@ -58,9 +58,9 @@ pub struct Question {
     pub data: QuestionVariant,
     pub comp_level: Strictness, // FIXME: Should this be moved up to the state machine?
     pub mastery: u8,            // 0-10 (Leitner System)
-    pub seen: usize,
     pub correct: usize,
-    pub atime: SystemTime,
+    pub seen: usize,
+    pub atime: SystemTime, // FIXME: Should be the time of the last correct answer!
 }
 
 /// Question Enum
@@ -130,8 +130,8 @@ impl Question {
             data,
             comp_level: Strictness::Trimmed,
             mastery: 0,
-            seen: 0,
             correct: 0,
+            seen: 0,
             atime: SystemTime::now(),
         }
     }

@@ -2,7 +2,7 @@ use super::{data::*, util::*};
 use crate::core::{
     data::Section,
     // FIXME: Do I want this in this file? Maybe I need a type synonym file...
-    quiz::{Progress, QuizRef},
+    quiz::{QuizProgress, QuizRef},
 };
 use tui::{
     style::{Color, Modifier, Style},
@@ -39,7 +39,7 @@ fn tree_view(section: &Section, state: &TreeState, f: &mut Frame) {
 // FIXME: Should that answer type be a struct?
 fn question_view(
     quiz: &QuizRef,
-    progress: &Progress,
+    progress: &QuizProgress,
     result: Option<&(bool, String)>,
     f: &mut Frame,
 ) {
@@ -94,16 +94,19 @@ fn tree_titlebar(root: &str, rest: &[String], selected: &Section, width: u16) ->
     let mut path = vec![root.to_owned()];
     path.extend(rest.to_vec());
     let path = path.join("/");
-    // FIXME: This should remove the plural for 1 item (or just not use words)
+    let children = selected.children.len();
+    let questions = selected.questions.len();
     let info = format!(
-        "{} Children, {} Questions",
-        selected.children.len(),
-        selected.questions.len()
+        "{} Child{}, {} Question{}",
+        children,
+        if children == 1 { "" } else { "ren" },
+        questions,
+        if questions == 1 { "" } else { "s" }
     );
     render_titlebar(path, line::HORIZONTAL, info, width)
 }
 
-fn progress_titlebar(progress: &Progress, width: u16) -> String {
+fn progress_titlebar(progress: &QuizProgress, width: u16) -> String {
     let learned = format!("Learned {} of {}", progress.learned, progress.questions);
     let score = if progress.score >= 0.0 {
         format!("Your score is {:.2}%", progress.score)

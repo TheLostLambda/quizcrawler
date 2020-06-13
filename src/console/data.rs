@@ -1,6 +1,6 @@
 use crate::core::{
     data::Section,
-    quiz::{MultipleChoice, Progress, QuizDispatcher, QuizRef},
+    quiz::{MultipleChoice, QuizDispatcher, QuizProgress, QuizRef},
 };
 use crossterm::event::KeyCode;
 use std::collections::HashMap;
@@ -37,7 +37,7 @@ impl TreeState {
 #[derive(Clone)]
 pub struct QuestionState {
     pub quiz: QuizRef,
-    pub progress: Progress,
+    pub progress: QuizProgress,
 }
 
 // FIXME: This could use some more thought
@@ -117,16 +117,15 @@ impl Quizcrawler {
 
     pub fn tick(&mut self) {
         match self.state_stack.last_mut() {
-            Some(State::Dispatch(dispatcher)) => match dispatcher.next() {
-                Some(quiz) => {
+            Some(State::Dispatch(dispatcher)) => {
+                if let Some(quiz) = dispatcher.next() {
                     let progress = dispatcher.progress();
                     let state = QuestionState { quiz, progress };
                     self.state_stack.push(State::AskQuestion(state));
-                }
-                None => {
+                } else {
                     self.state_stack.pop();
                 }
-            },
+            }
             _ => {}
         }
     }
