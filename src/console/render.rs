@@ -73,7 +73,7 @@ fn print_choices(quiz: &QuizRef) -> Vec<Text> {
 
 fn print_answer(correct: bool, answer: &str) -> Vec<Text> {
     let answer_string = format!(", the answer is: {}", answer);
-    let continue_string = "ENTER or SPACE to continue";
+    let continue_string = "SPACE to continue";
     let correct_style = Style::default().modifier(Modifier::BOLD).fg(Color::Green);
     let wrong_style = correct_style.fg(Color::Red);
     if correct {

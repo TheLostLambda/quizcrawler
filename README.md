@@ -7,10 +7,9 @@ leverages spaced repetition and forced / active recall to enhance learning. The
 gamification of studying should further increase engagement and recall.
 
 ## What am I doing now?
-  1. Ability to jump into a quiz
-  2. Finishing Quiz implementation
-  3. Basic Persistence
-  4. Fix MC (Similarity + Diminishing Options)
+  1. Finishing Quiz implementation
+  2. Basic Persistence
+  3. Fix MC (Similarity + Diminishing Options)
 
 ## Progress
 ### v0.5.0
@@ -95,10 +94,8 @@ gamification of studying should further increase engagement and recall.
 * Set up some unit tests
 * Comments and documentation
 * Better / smarter answer checking
-* Verify that all of the regex is resonable for borg
 * Clean up multi-line strings (get rid of whitespace after '\n')
 * A nicer interface with colour and ansi terminal features
-* Use hashmaps for the flash cards?
-* More functional or OO style?
 * Error handling! No more unwrap! Move error handling to main.
 * Document the purpose of each module. Including mod.rs
+* The QuizDispatcher should be configurable and pick the most needed questions

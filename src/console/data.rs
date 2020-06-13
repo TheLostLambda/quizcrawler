@@ -74,7 +74,7 @@ impl Quizcrawler {
                         state.path.push(child_names[current].to_owned())
                     }
                     // FIXME: This feels a tad muddled
-                    KeyCode::Right => {
+                    KeyCode::Enter => {
                         let mut path = state.path.clone();
                         path.push(child_names[current].to_owned());
                         // FIXME: unwrap is likely a bad idea here
@@ -106,7 +106,7 @@ impl Quizcrawler {
                     state.quiz.borrow_mut().i_was_right();
                     *correct = true;
                 }
-                KeyCode::Enter | KeyCode::Char(' ') => {
+                KeyCode::Char(' ') => {
                     self.state_stack.pop();
                 }
                 _ => {}
