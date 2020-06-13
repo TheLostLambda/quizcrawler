@@ -100,3 +100,4 @@ gamification of studying should further increase engagement and recall.
 * Error handling! No more unwrap! Move error handling to main.
 * Document the purpose of each module. Including mod.rs
 * The QuizDispatcher should be configurable and pick the most needed questions
+* If one quiz is more difficult than another, pick it for higher mastery q's
