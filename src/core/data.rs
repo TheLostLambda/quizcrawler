@@ -44,6 +44,19 @@ impl Section {
         }
         Some(current)
     }
+
+    pub fn get_questions(&self, recursive: bool) -> Vec<QuestionRef> {
+        let mut questions = self.questions.clone();
+        if recursive {
+            let mut sub_questions = self
+                .children
+                .iter()
+                .flat_map(|c| c.get_questions(true))
+                .collect();
+            questions.append(&mut sub_questions);
+        }
+        questions
+    }
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -182,6 +195,11 @@ impl Question {
         if self.correct > self.seen {
             self.correct = self.seen;
         }
+    }
+
+    // FIXME: I'm not thrilled about this variant function...
+    pub fn get_variant(&mut self) -> &mut QuestionVariant {
+        &mut self.data
     }
 
     fn increment_mastery(&mut self) {

@@ -20,7 +20,7 @@ pub struct QuestionProgress {
     pub seen: usize,
 }
 
-// FIXME: Add QDOptions. Change MCConfig to MCOptions
+// FIXME: Add QDOptions.
 
 // FIXME: Maybe rename to just `Dispatcher`?
 pub struct QuizDispatcher {
@@ -104,8 +104,8 @@ impl Iterator for QuizDispatcher {
     /// Sorts `Question`s by mastery, then dispatches a random `Quiz` if one
     /// is available
     fn next(&mut self) -> Option<QuizRef> {
-        // FIXME: Implement priority sorting and end the quiz after mastery
         let mut remaining = self.remaining_questions();
+        remaining.shuffle(&mut self.rng);
         remaining.sort_unstable_by_key(|q| self.question_progress(q).seen);
         let question = Rc::clone(remaining.first()?); // This was nicer as .pop()
         let quiz = self
@@ -154,28 +154,21 @@ pub trait Quiz {
     fn is_applicable(&self, q: &Question) -> bool;
 }
 
-// FIXME: I should be consistent here and cli.rs with Options vs Config (naming)
-
-pub struct MCConfig {
-    /// Whether `Term`'s should have their terms and definitions flipped
-    pub flipped: bool,
+pub struct MCSettings {
     /// The number of answer choices for each question
     pub choices: usize,
     // Add choice numbering method? ABC vs 123, etc
 }
 
-impl Default for MCConfig {
+impl Default for MCSettings {
     fn default() -> Self {
-        Self {
-            flipped: false,
-            choices: 4,
-        }
+        Self { choices: 4 }
     }
 }
 
 #[derive(Default)]
 pub struct MultipleChoice {
-    pub config: MCConfig,
+    pub settings: MCSettings,
     pub question: Option<QuestionRef>,
     pub context: Vec<QuestionRef>,
     choices: Vec<String>,
@@ -183,9 +176,9 @@ pub struct MultipleChoice {
 }
 
 impl MultipleChoice {
-    pub fn new(config: MCConfig) -> Self {
+    pub fn new(settings: MCSettings) -> Self {
         Self {
-            config,
+            settings,
             ..Self::default()
         }
     }
@@ -202,7 +195,7 @@ impl Quiz for MultipleChoice {
         self.choices = answer_bank
             .into_iter()
             .filter(|s| s != &answer)
-            .choose_multiple(&mut self.rng, self.config.choices - 1);
+            .choose_multiple(&mut self.rng, self.settings.choices - 1);
         self.choices.push(answer);
         self.choices.shuffle(&mut self.rng);
         self.question = Some(q);
@@ -224,8 +217,22 @@ impl Quiz for MultipleChoice {
         &self.choices[..]
     }
 
+    // FIXME: Should you count a question as "learned" if you needed to use a hint?
     fn get_hint(&mut self) {
-        todo!()
+        if let Some(ref q) = self.question {
+            if self.choices.len() > 2 {
+                let answer = q.borrow().peek().to_string();
+                let wrong = self
+                    .choices
+                    .iter()
+                    .enumerate()
+                    .filter(|&(_, s)| s != &answer)
+                    .map(|(i, _)| i)
+                    .choose(&mut self.rng)
+                    .unwrap();
+                self.choices.remove(wrong);
+            }
+        }
     }
 
     fn answer(&mut self, ans: &str) -> Option<(bool, String)> {

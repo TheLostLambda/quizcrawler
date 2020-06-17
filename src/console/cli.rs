@@ -1,11 +1,13 @@
 use super::{
-    data::{QCOptions, Quizcrawler},
+    data::{QCSettings, Quizcrawler},
     util,
 };
 use crate::crawler::data::Crawler;
-use crossterm::event::{self, Event, KeyCode::Char};
+use crossterm::event::{self, Event};
 use std::{error::Error, fs};
 use structopt::StructOpt;
+// FIXME: I really don't belong here...
+use crate::core::data::QuestionVariant::Term;
 // Tend to these imports! ^
 
 // Interaction in this file!
@@ -33,17 +35,24 @@ pub fn run() -> Result<(), Box<dyn Error>> {
     let crawler = Crawler::new(&crawler_recipe)?;
     let tree = crawler.parse_file(&args.notes);
 
+    // FIXME: This is a gross hack that doesn't belong here. The ability to
+    // toggle options should be exposed by Core
+    if args.flipped {
+        for q in tree.get_questions(true) {
+            if let Term(t) = q.borrow_mut().get_variant() {
+                t.flip();
+            }
+        }
+    }
+
+    let mut quizcrawler = Quizcrawler::new(QCSettings::default(), tree);
+
     let mut tui = util::setup_tui()?;
 
-    let mut quizcrawler = Quizcrawler::new(QCOptions::default(), tree);
-
-    loop {
-        quizcrawler.tick();
+    while quizcrawler.tick() {
         tui.draw(|mut f| quizcrawler.render(&mut f))?;
-        match event::read()? {
-            Event::Key(key) if key.code == Char('q') => break,
-            Event::Key(key) => quizcrawler.handle_key(key.code),
-            _ => continue,
+        if let Event::Key(key) = event::read()? {
+            quizcrawler.handle_key(key);
         }
     }
 

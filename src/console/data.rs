@@ -2,19 +2,17 @@ use crate::core::{
     data::Section,
     quiz::{MultipleChoice, QuizDispatcher, QuizProgress, QuizRef},
 };
-use crossterm::event::KeyCode;
+use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use std::collections::HashMap;
 
 // Trim back things that don't need to be public
 
 #[derive(Default)]
-pub struct QCOptions {
-    flipped: bool,
-}
+pub struct QCSettings {}
 
 pub struct Quizcrawler {
     pub tree: Section,
-    pub options: QCOptions,
+    pub settings: QCSettings,
     pub state_stack: Vec<State>,
 }
 
@@ -49,15 +47,15 @@ pub enum State {
 }
 
 impl Quizcrawler {
-    pub fn new(options: QCOptions, tree: Section) -> Self {
+    pub fn new(settings: QCSettings, tree: Section) -> Self {
         Self {
             tree,
-            options,
+            settings,
             state_stack: vec![State::TreeView(TreeState::default())],
         }
     }
 
-    pub fn handle_key(&mut self, key: KeyCode) {
+    pub fn handle_key(&mut self, key: KeyEvent) {
         match self.state_stack.last_mut() {
             Some(State::TreeView(state)) => {
                 // FIXME: Maybe move this to a function?
@@ -67,18 +65,25 @@ impl Quizcrawler {
                 let current = state.get_selected();
                 // This gives me an entry, a mutable reference which is updated in the match
                 let selector = state.get_selected_mut();
-                match key {
+                match key.code {
+                    KeyCode::Char('q') => {
+                        self.state_stack.pop();
+                    }
                     KeyCode::Up if current > 0 => *selector -= 1,
                     KeyCode::Down if current < limit => *selector += 1,
                     KeyCode::Right if node.children[current].is_parent() => {
                         state.path.push(child_names[current].to_owned())
                     }
                     // FIXME: This feels a tad muddled
-                    KeyCode::Enter => {
+                    KeyCode::Char(' ') => {
                         let mut path = state.path.clone();
                         path.push(child_names[current].to_owned());
                         // FIXME: unwrap is likely a bad idea here
-                        let questions = &self.tree.child_at_path(&path).unwrap().questions;
+                        let questions = &self
+                            .tree
+                            .child_at_path(&path)
+                            .unwrap()
+                            .get_questions(key.modifiers.contains(KeyModifiers::CONTROL));
                         let mut dispatcher = QuizDispatcher::new(questions.to_vec());
                         dispatcher.register_quiz(MultipleChoice::default());
                         self.state_stack.push(State::Dispatch(dispatcher))
@@ -91,17 +96,34 @@ impl Quizcrawler {
             }
             Some(State::AskQuestion(state)) => {
                 if !state.quiz.borrow().get_choices().is_empty() {
-                    if let KeyCode::Char(c) = key {
-                        let result = state.quiz.borrow_mut().answer(&c.to_string());
-                        if let Some(result) = result {
-                            let state = state.clone();
+                    match key.code {
+                        KeyCode::Char('q') => {
+                            // FIXME: This double-pop is hacky and is needed to get past the dispatcher
+                            // Write a rewind function to pop the stack back until some condition is met,
+                            // like reaching something isn't Dispatch. Maybe the states could have a
+                            // transient flag and all of those are popped off.
                             self.state_stack.pop();
-                            self.state_stack.push(State::AnswerQuestion(state, result))
+                            self.state_stack.pop();
                         }
+                        KeyCode::Char('h') => state.quiz.borrow_mut().get_hint(),
+                        KeyCode::Char(c) => {
+                            let result = state.quiz.borrow_mut().answer(&c.to_string());
+                            if let Some(result) = result {
+                                let state = state.clone();
+                                self.state_stack.pop();
+                                self.state_stack.push(State::AnswerQuestion(state, result))
+                            }
+                        }
+                        _ => {}
                     }
                 }
             }
-            Some(State::AnswerQuestion(state, (correct, _))) => match key {
+            Some(State::AnswerQuestion(state, (correct, _))) => match key.code {
+                KeyCode::Char('q') => {
+                    // FIXME: Hacky double-pop
+                    self.state_stack.pop();
+                    self.state_stack.pop();
+                }
                 KeyCode::Char('o') if !*correct => {
                     state.quiz.borrow_mut().i_was_right();
                     *correct = true;
@@ -115,7 +137,7 @@ impl Quizcrawler {
         }
     }
 
-    pub fn tick(&mut self) {
+    pub fn tick(&mut self) -> bool {
         match self.state_stack.last_mut() {
             Some(State::Dispatch(dispatcher)) => {
                 if let Some(quiz) = dispatcher.next() {
@@ -126,7 +148,9 @@ impl Quizcrawler {
                     self.state_stack.pop();
                 }
             }
+            None => return false,
             _ => {}
         }
+        true
     }
 }

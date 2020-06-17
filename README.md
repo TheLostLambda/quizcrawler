@@ -7,10 +7,9 @@ leverages spaced repetition and forced / active recall to enhance learning. The
 gamification of studying should further increase engagement and recall.
 
 ## What am I doing now?
-  1. Finishing Quiz implementation
-  2. Add tests for question state changes (mastery, correct, etc)
-  3. Basic Persistence
-  4. Fix MC (Similarity + Diminishing Options)
+  1. Add tests for question state changes (mastery, correct, etc)
+  2. Basic Persistence
+  3. Fix MC (Similarity)
 
 ## Progress
 ### v0.5.0
@@ -24,7 +23,7 @@ gamification of studying should further increase engagement and recall.
       - [x] "I was right" option
     - [ ] Multiple choice
       - [x] Basic support
-      - [ ] Hint / eliminate some answers
+      - [x] Hint / eliminate some answers
       - [ ] Detect and present similar answers
     - [ ] Check yourself / open
       - [ ] Basic support
@@ -101,3 +100,4 @@ gamification of studying should further increase engagement and recall.
 * Document the purpose of each module. Including mod.rs
 * The QuizDispatcher should be configurable and pick the most needed questions
 * If one quiz is more difficult than another, pick it for higher mastery q's
+* Handle preservation of whitespace!
