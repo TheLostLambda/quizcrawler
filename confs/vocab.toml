@@ -17,6 +17,7 @@ body = "[\\s\\S]*?"
 # The Regex details for definition-style questions
 # "- (.*) :: ([\s\S]*?)(?=\n\s*[-*]+)"
 [term]
+flipped = true
 leader = "- "
 term = ".*"
 separator = " :: "

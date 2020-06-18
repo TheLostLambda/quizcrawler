@@ -1,7 +1,7 @@
 use super::{data::Crawler, util};
 use crate::core::data::*;
 use onig::Regex;
-use std::{fs, path::Path};
+use std::{fs, mem, path::Path};
 
 impl Crawler {
     /// Parse flashcards from str
@@ -16,10 +16,12 @@ impl Crawler {
             let mut questions = Vec::new();
             for caps in matches.captures_iter(src) {
                 remainder = remainder.replace(caps.at(0).unwrap(), "");
-                questions.push(Term::new(
-                    util::reflow_string(&self.flow, caps.at(1).unwrap()),
-                    util::reflow_string(&self.flow, caps.at(2).unwrap()),
-                ));
+                let mut term = util::reflow_string(&self.flow, caps.at(1).unwrap());
+                let mut definition = util::reflow_string(&self.flow, caps.at(2).unwrap());
+                if rules.flipped.is_some() && rules.flipped.unwrap() {
+                    mem::swap(&mut term, &mut definition);
+                }
+                questions.push(Term::new(term, definition));
             }
             (remainder, questions)
         } else {

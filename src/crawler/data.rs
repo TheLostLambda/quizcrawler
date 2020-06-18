@@ -33,6 +33,7 @@ pub struct SectionConfig {
 /// This struct holds the regex components needed to extract flashcards
 #[derive(Debug, Deserialize)]
 pub struct TermConfig {
+    pub flipped: Option<bool>,
     pub leader: String,
     pub term: String,
     pub separator: String,

@@ -73,7 +73,6 @@ impl QuizDispatcher {
             .collect()
     }
 
-    // FIXME: Should this return `seen` and `correct` in a struct?
     fn question_progress(&self, question: &QuestionRef) -> QuestionProgress {
         let question = question.borrow();
         // FIXME: Handle this unwrap a bit better
@@ -176,7 +175,7 @@ pub struct MultipleChoice {
 }
 
 impl MultipleChoice {
-    pub fn new(settings: MCSettings) -> Self {
+    pub fn _new(settings: MCSettings) -> Self {
         Self {
             settings,
             ..Self::default()

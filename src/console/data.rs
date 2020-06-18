@@ -147,10 +147,10 @@ impl Quizcrawler {
                 } else {
                     self.state_stack.pop();
                 }
+                true
             }
-            None => return false,
-            _ => {}
+            Some(_) => true,
+            None => false,
         }
-        true
     }
 }

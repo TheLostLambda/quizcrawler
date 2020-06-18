@@ -7,7 +7,7 @@ leverages spaced repetition and forced / active recall to enhance learning. The
 gamification of studying should further increase engagement and recall.
 
 ## What am I doing now?
-  1. Add tests for question state changes (mastery, correct, etc)
+  1. Add loads of tests + window fixing
   2. Basic Persistence
   3. Fix MC (Similarity)
 
@@ -40,7 +40,7 @@ gamification of studying should further increase engagement and recall.
       - [ ] Save "sessions" (which question was I on?)
     - [x] Record how many times a question was answered correctly & incorrectly
       - [x] Have a single "mastery" number (higher -> less asked)
-    - [ ] Record the last time questions were asked
+    - [x] Record the last time questions were asked
   - [ ] Interface
     - [ ] Main screen
       - [ ] List of quizzes due for review (spaced reps)

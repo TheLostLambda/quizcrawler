@@ -115,7 +115,7 @@ impl Term {
         }))
     }
 
-    pub fn flip(&mut self) {
+    pub fn _flip(&mut self) {
         self.inverted = !self.inverted;
     }
 }
@@ -197,8 +197,7 @@ impl Question {
         }
     }
 
-    // FIXME: I'm not thrilled about this variant function...
-    pub fn get_variant(&mut self) -> &mut QuestionVariant {
+    pub fn _get_variant(&mut self) -> &mut QuestionVariant {
         &mut self.data
     }
 
