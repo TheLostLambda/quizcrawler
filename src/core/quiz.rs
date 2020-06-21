@@ -1,9 +1,11 @@
-use super::data::{Question, QuestionRef, QuestionVariant};
+use super::data::{Question, QuestionRef, QuestionVariant, Section, Path};
 use rand::{prelude::*, seq::IteratorRandom};
 use std::{cell::RefCell, collections::HashSet, rc::Rc};
 
 // FIXME: Add some explanations
 pub type QuizRef = Rc<RefCell<Box<dyn Quiz>>>;
+
+// FIXME: (QuestionRef, Path) needs a type synonym?
 
 // FIXME: Where do I belong?
 #[derive(Clone, Copy)]
@@ -19,32 +21,38 @@ pub struct QuestionProgress {
     pub correct: usize,
     pub seen: usize,
 }
-
+// FIXME: Ensure that all "settings" structs implement Copy
+#[derive(Default, Clone, Copy)]
 pub struct DSettings {
     pub recursive: bool,
 }
 
 pub struct Dispatcher {
-    questions: Vec<QuestionRef>,
+    // FIXME: Really not a fan of this tuple hiding the Ref
+    questions: Vec<(QuestionRef, Path)>,
     quizzes: Vec<QuizRef>,
-    reference: HashSet<Question>,
+    reference: HashSet<(Question, Path)>,
+    settings: DSettings,
     rng: ThreadRng,
 }
 
 // FIXME: Should this use the builder pattern?
 impl Dispatcher {
+    // FIXME: Should "settings" be the first or second argument?
     /// Set the list of `Question`'s to ask and `Quiz`'s to be dispatched
-    pub fn new(questions: Vec<QuestionRef>) -> Self {
+    pub fn new(settings: DSettings, section: &Section) -> Self {
         // FIXME: Add some explanations
+        let questions = Self::get_questions(section, settings.recursive);
         let reference = questions
             .iter()
-            .map(|rc| RefCell::clone(rc).into_inner())
+            .map(|(rc, path)| (RefCell::clone(rc).into_inner(), path.clone()))
             .collect();
         let rng = thread_rng();
         Self {
             questions,
             quizzes: Vec::new(),
             reference,
+            settings,
             rng,
         }
     }
@@ -64,8 +72,29 @@ impl Dispatcher {
         }
     }
 
+    // FIXME: I don't like taking a Path here b/c I need to always pass an empty vector
+    fn get_questions(section: &Section, recursive: bool) -> Vec<(QuestionRef, Path)> {
+        fn go(section: &Section, recursive: bool, path: &Path) -> Vec<(QuestionRef, Path)> {
+            let mut path = path.clone(); // FIXME: Do I need a clone here?
+            path.push(section.name);
+            let mut questions: Vec<(QuestionRef, Path)> = section.questions.iter().cloned().map(|q| (q, path.clone())).collect();
+            if recursive {
+                let mut sub_questions = section
+                    .children
+                    .iter()
+                    .flat_map(|c|
+                        go(c, recursive, &path)
+                    )
+                    .collect();
+                questions.append(&mut sub_questions);
+            }
+            questions
+        }
+        go(section, recursive, &Vec::new())
+    }
+
     // FIXME: Add a configurable mastery threshold for progression
-    fn remaining_questions(&self) -> Vec<QuestionRef> {
+    fn remaining_questions(&self) -> Vec<(QuestionRef, Path)> {
         self.questions
             .iter()
             .cloned()
@@ -73,10 +102,10 @@ impl Dispatcher {
             .collect()
     }
 
-    fn question_progress(&self, question: &QuestionRef) -> QuestionProgress {
-        let question = question.borrow();
+    fn question_progress(&self, question: &(QuestionRef, Path)) -> QuestionProgress {
+        let key @ (question, _) = (*question.0.borrow(), question.1);
         // FIXME: Handle this unwrap a bit better
-        let ref_question = self.reference.get(&question).unwrap();
+        let ref_question = self.reference.get(&key).unwrap().0;
         let correct = question.correct - ref_question.correct;
         let seen = question.seen - ref_question.seen;
         QuestionProgress { correct, seen }
@@ -129,7 +158,8 @@ impl Iterator for Dispatcher {
         Some(quiz)
     }
 }
-
+// FIXME: Add a `get_context` function so the renderer can handle paths
+// FIXME: Create a context struct with the path and other questions
 pub trait Quiz {
     /// Sets the `Question` to be asked
     fn set_question(&mut self, q: QuestionRef);

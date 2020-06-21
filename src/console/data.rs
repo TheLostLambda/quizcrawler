@@ -1,6 +1,6 @@
 use crate::core::{
-    data::Section,
-    quiz::{Dispatcher, MultipleChoice, QuizProgress, QuizRef},
+    data::{Section, Path},
+    quiz::{Dispatcher, MultipleChoice, QuizProgress, QuizRef, DSettings},
 };
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use std::collections::HashMap;
@@ -18,8 +18,8 @@ pub struct Quizcrawler {
 
 #[derive(Default)]
 pub struct TreeState {
-    pub path: Vec<String>,
-    pub selection_history: HashMap<Vec<String>, usize>,
+    pub path: Path,
+    pub selection_history: HashMap<Path, usize>,
 }
 
 impl TreeState {
@@ -79,12 +79,15 @@ impl Quizcrawler {
                         let mut path = state.path.clone();
                         path.push(child_names[current].to_owned());
                         // FIXME: unwrap is likely a bad idea here
-                        let questions = &self
+                        let section = self
                             .tree
                             .child_at_path(&path)
-                            .unwrap()
-                            .get_questions(key.modifiers.contains(KeyModifiers::CONTROL));
-                        let mut dispatcher = Dispatcher::new(questions.to_vec());
+                            .unwrap();
+                        let settings = DSettings {
+                            recursive: key.modifiers.contains(KeyModifiers::CONTROL),
+                            ..Default::default()
+                        };
+                        let mut dispatcher = Dispatcher::new(settings, section);
                         dispatcher.register_quiz(MultipleChoice::default());
                         self.state_stack.push(State::Dispatch(dispatcher))
                     }

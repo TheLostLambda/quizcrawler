@@ -10,6 +10,9 @@ use std::{
 // FIXME: Add some explanations
 pub type QuestionRef = Rc<RefCell<Question>>;
 
+// FIXME: Where do I belong
+pub type Path = Vec<String>;
+
 // I really don't know how I feel about these public fields...
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Section {
@@ -43,19 +46,6 @@ impl Section {
             current = current.children.iter().find(|c| c.name == name.as_ref())?;
         }
         Some(current)
-    }
-
-    pub fn get_questions(&self, recursive: bool) -> Vec<QuestionRef> {
-        let mut questions = self.questions.clone();
-        if recursive {
-            let mut sub_questions = self
-                .children
-                .iter()
-                .flat_map(|c| c.get_questions(true))
-                .collect();
-            questions.append(&mut sub_questions);
-        }
-        questions
     }
 }
 
