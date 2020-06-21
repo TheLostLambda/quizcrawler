@@ -20,10 +20,11 @@ pub struct QuestionProgress {
     pub seen: usize,
 }
 
-// FIXME: Add QDOptions.
+pub struct DSettings {
+    pub recursive: bool,
+}
 
-// FIXME: Maybe rename to just `Dispatcher`?
-pub struct QuizDispatcher {
+pub struct Dispatcher {
     questions: Vec<QuestionRef>,
     quizzes: Vec<QuizRef>,
     reference: HashSet<Question>,
@@ -31,7 +32,7 @@ pub struct QuizDispatcher {
 }
 
 // FIXME: Should this use the builder pattern?
-impl QuizDispatcher {
+impl Dispatcher {
     /// Set the list of `Question`'s to ask and `Quiz`'s to be dispatched
     pub fn new(questions: Vec<QuestionRef>) -> Self {
         // FIXME: Add some explanations
@@ -56,7 +57,6 @@ impl QuizDispatcher {
     /// Returns the number of questions in the set, how many have been learned,
     /// and the current score as a percentage
     pub fn progress(&self) -> QuizProgress {
-        // FIXME: Put actual logic here
         QuizProgress {
             questions: self.questions.len(),
             learned: self.questions.len() - self.remaining_questions().len(),
@@ -97,7 +97,7 @@ impl QuizDispatcher {
     }
 }
 
-impl Iterator for QuizDispatcher {
+impl Iterator for Dispatcher {
     type Item = QuizRef;
 
     /// Sorts `Question`s by mastery, then dispatches a random `Quiz` if one

@@ -121,7 +121,7 @@ impl Term {
 }
 
 impl List {
-    // Slice of strings here? &[] not Vec?
+    // FIXME: Slice of strings here? &[] not Vec?
     pub fn new(order: u32, item: String, details: Vec<String>) -> Question {
         Question::new(QuestionVariant::List(Self {
             order,
@@ -218,6 +218,10 @@ impl PartialEq for Question {
     fn eq(&self, other: &Self) -> bool {
         match (&self.data, &other.data) {
             (QuestionVariant::Term(s), QuestionVariant::Term(o)) => s.term == o.term,
+            (QuestionVariant::List(s), QuestionVariant::List(o)) => {
+                s.order == o.order && s.item == o.item
+            }
+            (QuestionVariant::Bullet(s), QuestionVariant::Bullet(o)) => s.body == o.body,
             _ => false,
         }
     }
@@ -229,7 +233,11 @@ impl Hash for Question {
     fn hash<H: Hasher>(&self, state: &mut H) {
         match &self.data {
             QuestionVariant::Term(s) => s.term.hash(state),
-            _ => {}
+            QuestionVariant::List(s) => {
+                s.order.hash(state);
+                s.item.hash(state);
+            }
+            QuestionVariant::Bullet(s) => s.body.hash(state),
         }
     }
 }

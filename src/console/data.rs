@@ -1,6 +1,6 @@
 use crate::core::{
     data::Section,
-    quiz::{MultipleChoice, QuizDispatcher, QuizProgress, QuizRef},
+    quiz::{Dispatcher, MultipleChoice, QuizProgress, QuizRef},
 };
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use std::collections::HashMap;
@@ -41,7 +41,7 @@ pub struct QuestionState {
 // FIXME: This could use some more thought
 pub enum State {
     TreeView(TreeState),
-    Dispatch(QuizDispatcher),
+    Dispatch(Dispatcher),
     AskQuestion(QuestionState),
     AnswerQuestion(QuestionState, (bool, String)), // FIXME: Ew
 }
@@ -84,7 +84,7 @@ impl Quizcrawler {
                             .child_at_path(&path)
                             .unwrap()
                             .get_questions(key.modifiers.contains(KeyModifiers::CONTROL));
-                        let mut dispatcher = QuizDispatcher::new(questions.to_vec());
+                        let mut dispatcher = Dispatcher::new(questions.to_vec());
                         dispatcher.register_quiz(MultipleChoice::default());
                         self.state_stack.push(State::Dispatch(dispatcher))
                     }

@@ -7,9 +7,12 @@ leverages spaced repetition and forced / active recall to enhance learning. The
 gamification of studying should further increase engagement and recall.
 
 ## What am I doing now?
-  1. Add loads of tests + window fixing
-  2. Basic Persistence
-  3. Fix MC (Similarity)
+  1. Adding path context to questions
+  2. Track number of hints per question
+  3. Fix indentation with wrap in TUI
+  4. Add loads of tests + window fixing
+  5. Basic Persistence
+  6. Fix MC (Similarity)
 
 ## Progress
 ### v0.5.0
@@ -99,5 +102,5 @@ gamification of studying should further increase engagement and recall.
 * Error handling! No more unwrap! Move error handling to main.
 * Document the purpose of each module. Including mod.rs
 * The QuizDispatcher should be configurable and pick the most needed questions
-* If one quiz is more difficult than another, pick it for higher mastery q's
+* If one quiz is more difficult than another, pick it for higher mastery q's (is_applicable)
 * Handle preservation of whitespace!
