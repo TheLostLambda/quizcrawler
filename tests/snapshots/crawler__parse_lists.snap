@@ -7,6 +7,7 @@ expression: cards
     name: "Terms",
     questions: [
       Question(
+        id: "[id]",
         data: List(List(
           order: 1,
           item: "Use numbers to indicate some sort of process or ranking.",
@@ -21,6 +22,7 @@ expression: cards
         last_correct: "[last_correct]",
       ),
       Question(
+        id: "[id]",
         data: List(List(
           order: 2,
           item: "This, for example, happens after the first point.",
@@ -33,6 +35,7 @@ expression: cards
         last_correct: "[last_correct]",
       ),
       Question(
+        id: "[id]",
         data: List(List(
           order: 3,
           item: "Or perhaps this is the third most expensive solution.",

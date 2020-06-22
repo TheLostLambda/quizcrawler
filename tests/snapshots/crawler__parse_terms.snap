@@ -7,6 +7,7 @@ expression: cards
     name: "Terms",
     questions: [
       Question(
+        id: "[id]",
         data: Term(Term(
           term: "der / die Lehrer(in)",
           definition: "teacher",
@@ -19,6 +20,7 @@ expression: cards
         last_correct: "[last_correct]",
       ),
       Question(
+        id: "[id]",
         data: Term(Term(
           term: "wissen / weiß / hat gewusst",
           definition: "to know",
@@ -31,6 +33,7 @@ expression: cards
         last_correct: "[last_correct]",
       ),
       Question(
+        id: "[id]",
         data: Term(Term(
           term: "in der Zwischenzeit",
           definition: "[in the] meantime",

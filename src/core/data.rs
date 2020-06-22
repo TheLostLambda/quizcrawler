@@ -6,12 +6,10 @@ use std::{
     rc::Rc,
     time::SystemTime,
 };
+use uuid::Uuid;
 
 // FIXME: Add some explanations
 pub type QuestionRef = Rc<RefCell<Question>>;
-
-// FIXME: Where do I belong
-pub type Path = Vec<String>;
 
 // I really don't know how I feel about these public fields...
 #[derive(Clone, Serialize, Deserialize)]
@@ -58,16 +56,17 @@ pub enum Strictness {
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Question {
+    pub id: Uuid,
     pub data: QuestionVariant,
     pub comp_level: Strictness, // FIXME: Should this be moved up to the state machine?
     pub mastery: u8,            // 0-10 (Leitner System)
     pub correct: usize,
     pub seen: usize,
-    pub last_correct: SystemTime, // FIXME: Should be the time of the last correct answer!
+    pub last_correct: SystemTime,
 }
 
 /// Question Enum
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub enum QuestionVariant {
     Term(Term),
     List(List),
@@ -75,7 +74,7 @@ pub enum QuestionVariant {
 }
 
 /// Flash Cards
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub struct Term {
     term: String,
     definition: String,
@@ -84,14 +83,14 @@ pub struct Term {
 
 // Not a fan of this section having children, but I'll allow it for now
 // Also, term? item? body? Pick one.
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub struct List {
     order: u32,
     item: String,
     details: Vec<String>,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub struct Bullet {
     body: String,
 }
@@ -130,6 +129,7 @@ impl Bullet {
 impl Question {
     pub fn new(data: QuestionVariant) -> Question {
         Question {
+            id: Uuid::new_v4(),
             data,
             comp_level: Strictness::Trimmed,
             mastery: 0,
@@ -191,6 +191,7 @@ impl Question {
         &mut self.data
     }
 
+    // FIXME: Make the range of min and max mastery configurable
     fn increment_mastery(&mut self) {
         if self.mastery < 10 {
             self.mastery += 1;
@@ -206,14 +207,7 @@ impl Question {
 
 impl PartialEq for Question {
     fn eq(&self, other: &Self) -> bool {
-        match (&self.data, &other.data) {
-            (QuestionVariant::Term(s), QuestionVariant::Term(o)) => s.term == o.term,
-            (QuestionVariant::List(s), QuestionVariant::List(o)) => {
-                s.order == o.order && s.item == o.item
-            }
-            (QuestionVariant::Bullet(s), QuestionVariant::Bullet(o)) => s.body == o.body,
-            _ => false,
-        }
+        self.data == other.data
     }
 }
 
@@ -221,13 +215,6 @@ impl Eq for Question {}
 
 impl Hash for Question {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        match &self.data {
-            QuestionVariant::Term(s) => s.term.hash(state),
-            QuestionVariant::List(s) => {
-                s.order.hash(state);
-                s.item.hash(state);
-            }
-            QuestionVariant::Bullet(s) => s.body.hash(state),
-        }
+        self.data.hash(state);
     }
 }

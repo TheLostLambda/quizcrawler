@@ -59,7 +59,12 @@ fn question_view(
 }
 
 fn print_question(quiz: &QuizRef) -> Vec<Text> {
-    vec![Text::raw(format!("{}\n\n", quiz.borrow().ask()))]
+    // FIXME: VERY temporary
+    vec![Text::raw(format!(
+        "{:?}\n{}\n\n",
+        quiz.borrow().get_context().path,
+        quiz.borrow().ask()
+    ))]
 }
 
 fn print_choices(quiz: &QuizRef) -> Vec<Text> {

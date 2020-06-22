@@ -1,11 +1,16 @@
-use super::data::{Question, QuestionRef, QuestionVariant, Section, Path};
+use super::data::{Question, QuestionRef, QuestionVariant, Section};
 use rand::{prelude::*, seq::IteratorRandom};
-use std::{cell::RefCell, collections::HashSet, rc::Rc};
+use std::{
+    cell::RefCell,
+    collections::{HashMap, HashSet},
+    rc::Rc,
+};
+use uuid::Uuid;
 
 // FIXME: Add some explanations
 pub type QuizRef = Rc<RefCell<Box<dyn Quiz>>>;
 
-// FIXME: (QuestionRef, Path) needs a type synonym?
+// FIXME: (QuestionRef, Vec<String>) needs a type synonym?
 
 // FIXME: Where do I belong?
 #[derive(Clone, Copy)]
@@ -21,6 +26,14 @@ pub struct QuestionProgress {
     pub correct: usize,
     pub seen: usize,
 }
+
+// FIXME: Where do I belong?
+#[derive(Default, Clone)]
+pub struct QuestionCtx {
+    pub path: Vec<String>,
+    pub siblings: Vec<QuestionRef>,
+}
+
 // FIXME: Ensure that all "settings" structs implement Copy
 #[derive(Default, Clone, Copy)]
 pub struct DSettings {
@@ -28,11 +41,10 @@ pub struct DSettings {
 }
 
 pub struct Dispatcher {
-    // FIXME: Really not a fan of this tuple hiding the Ref
-    questions: Vec<(QuestionRef, Path)>,
+    questions: Vec<QuestionRef>,
     quizzes: Vec<QuizRef>,
-    reference: HashSet<(Question, Path)>,
-    settings: DSettings,
+    reference: HashMap<Uuid, (Question, Vec<String>)>, // FIXME: Should I really be lumping Question and Vec<String> together?
+    _settings: DSettings,
     rng: ThreadRng,
 }
 
@@ -42,18 +54,38 @@ impl Dispatcher {
     /// Set the list of `Question`'s to ask and `Quiz`'s to be dispatched
     pub fn new(settings: DSettings, section: &Section) -> Self {
         // FIXME: Add some explanations
-        let questions = Self::get_questions(section, settings.recursive);
-        let reference = questions
-            .iter()
-            .map(|(rc, path)| (RefCell::clone(rc).into_inner(), path.clone()))
-            .collect();
-        let rng = thread_rng();
-        Self {
-            questions,
-            quizzes: Vec::new(),
-            reference,
+        #[derive(Default)]
+        struct TraverseCtx {
+            questions: Vec<QuestionRef>,
+            reference: HashMap<Uuid, (Question, Vec<String>)>,
+            settings: DSettings,
+        }
+        fn traverse_section(ctx: &mut TraverseCtx, mut path: Vec<String>, section: &Section) {
+            path.push(section.name.clone());
+            for q in &section.questions {
+                ctx.questions.push(Rc::clone(q));
+                ctx.reference.insert(
+                    q.borrow().id,
+                    (RefCell::clone(q).into_inner(), path.clone()),
+                );
+            }
+            if ctx.settings.recursive {
+                for c in &section.children {
+                    traverse_section(ctx, path.clone(), &c);
+                }
+            }
+        }
+        let mut ctx = TraverseCtx {
             settings,
-            rng,
+            ..Default::default()
+        };
+        traverse_section(&mut ctx, Vec::new(), section);
+        Self {
+            questions: ctx.questions,
+            quizzes: Vec::new(),
+            reference: ctx.reference,
+            _settings: settings,
+            rng: thread_rng(),
         }
     }
 
@@ -72,29 +104,8 @@ impl Dispatcher {
         }
     }
 
-    // FIXME: I don't like taking a Path here b/c I need to always pass an empty vector
-    fn get_questions(section: &Section, recursive: bool) -> Vec<(QuestionRef, Path)> {
-        fn go(section: &Section, recursive: bool, path: &Path) -> Vec<(QuestionRef, Path)> {
-            let mut path = path.clone(); // FIXME: Do I need a clone here?
-            path.push(section.name);
-            let mut questions: Vec<(QuestionRef, Path)> = section.questions.iter().cloned().map(|q| (q, path.clone())).collect();
-            if recursive {
-                let mut sub_questions = section
-                    .children
-                    .iter()
-                    .flat_map(|c|
-                        go(c, recursive, &path)
-                    )
-                    .collect();
-                questions.append(&mut sub_questions);
-            }
-            questions
-        }
-        go(section, recursive, &Vec::new())
-    }
-
     // FIXME: Add a configurable mastery threshold for progression
-    fn remaining_questions(&self) -> Vec<(QuestionRef, Path)> {
+    fn remaining_questions(&self) -> Vec<QuestionRef> {
         self.questions
             .iter()
             .cloned()
@@ -102,10 +113,10 @@ impl Dispatcher {
             .collect()
     }
 
-    fn question_progress(&self, question: &(QuestionRef, Path)) -> QuestionProgress {
-        let key @ (question, _) = (*question.0.borrow(), question.1);
+    fn question_progress(&self, question: &QuestionRef) -> QuestionProgress {
+        let question = question.borrow();
         // FIXME: Handle this unwrap a bit better
-        let ref_question = self.reference.get(&key).unwrap().0;
+        let (ref_question, _) = self.reference.get(&question.id).unwrap();
         let correct = question.correct - ref_question.correct;
         let seen = question.seen - ref_question.seen;
         QuestionProgress { correct, seen }
@@ -143,16 +154,17 @@ impl Iterator for Dispatcher {
             .filter(|qz| qz.borrow().is_applicable(&question.borrow()))
             .choose(&mut self.rng)?;
         // Make sure that all contextual questions are supported as well
-        let context: Vec<_> = self
+        let siblings: Vec<_> = self
             .questions
             .iter()
             .cloned()
             .filter(|q| quiz.borrow().is_applicable(&q.borrow()))
             .collect();
+        let (_, path) = self.reference.get(&question.borrow().id).unwrap(); // FIXME: Spooky unwrap
+        let path = path.clone();
         {
             let mut quiz = quiz.borrow_mut();
-            // FIXME: Should this just take a Vec<QuestionRef> directly?
-            quiz.set_context(&context[..]);
+            quiz.set_context(&QuestionCtx { path, siblings });
             quiz.set_question(question);
         }
         Some(quiz)
@@ -163,8 +175,10 @@ impl Iterator for Dispatcher {
 pub trait Quiz {
     /// Sets the `Question` to be asked
     fn set_question(&mut self, q: QuestionRef);
-    /// Sets the context (a list of `Questions`) that this Quiz belongs in
-    fn set_context(&mut self, ctx: &[QuestionRef]);
+    /// Sets the context that this Quiz belongs in
+    fn set_context(&mut self, ctx: &QuestionCtx);
+    /// Gets the context that this Quiz belongs in
+    fn get_context(&self) -> &QuestionCtx;
     /// Ask the `Question`, returning a `String` to be displayed. This returns
     /// a `String`, not a `&str`, so quizzes can do formatting on the question
     /// string before it's passed to the console
@@ -197,9 +211,9 @@ impl Default for MCSettings {
 
 #[derive(Default)]
 pub struct MultipleChoice {
-    pub settings: MCSettings,
-    pub question: Option<QuestionRef>,
-    pub context: Vec<QuestionRef>,
+    settings: MCSettings,
+    question: Option<QuestionRef>,
+    context: QuestionCtx,
     choices: Vec<String>,
     rng: ThreadRng,
 }
@@ -216,8 +230,9 @@ impl MultipleChoice {
 impl Quiz for MultipleChoice {
     fn set_question(&mut self, q: QuestionRef) {
         let answer = q.borrow().peek().to_string();
-        let answer_bank: HashSet<_> = self
+        let answer_bank: HashSet<String> = self
             .context
+            .siblings
             .iter()
             .map(|q| q.borrow().peek().to_string())
             .collect();
@@ -230,8 +245,12 @@ impl Quiz for MultipleChoice {
         self.question = Some(q);
     }
 
-    fn set_context(&mut self, ctx: &[QuestionRef]) {
-        self.context = ctx.to_vec();
+    fn set_context(&mut self, ctx: &QuestionCtx) {
+        self.context = ctx.to_owned();
+    }
+
+    fn get_context(&self) -> &QuestionCtx {
+        &self.context
     }
 
     // FIXME: Should this return a Cow<'static, str>?
