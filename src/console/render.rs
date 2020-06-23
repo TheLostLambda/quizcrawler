@@ -46,7 +46,8 @@ fn question_view(
     let size = f.size();
     // FIXME: These messages need some refining
     let title = progress_titlebar(progress, size.width);
-    let mut text = print_question(&quiz);
+    let mut text = print_context(&quiz);
+    text.extend(print_question(&quiz));
     if let Some(&(correct, ref answer)) = result {
         text.extend(print_answer(correct, answer));
     } else {
@@ -58,13 +59,15 @@ fn question_view(
     f.render_widget(list, size);
 }
 
+fn print_context(quiz: &QuizRef) -> Vec<Text> {
+    let style = Style::new().modifier(Modifier::ITALIC);
+    let path = quiz.borrow().get_context().path.join(" > ");
+    vec![Text::styled(format!("{}\n", path), style)]
+}
+
 fn print_question(quiz: &QuizRef) -> Vec<Text> {
-    // FIXME: VERY temporary
-    vec![Text::raw(format!(
-        "{:?}\n{}\n\n",
-        quiz.borrow().get_context().path,
-        quiz.borrow().ask()
-    ))]
+    let style = Style::new().modifier(Modifier::BOLD);
+    vec![Text::styled(format!("{}\n\n", quiz.borrow().ask()), style)]
 }
 
 fn print_choices(quiz: &QuizRef) -> Vec<Text> {

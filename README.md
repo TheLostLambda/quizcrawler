@@ -7,12 +7,9 @@ leverages spaced repetition and forced / active recall to enhance learning. The
 gamification of studying should further increase engagement and recall.
 
 ## What am I doing now?
-  1. Adding path context to questions
-  2. Track number of hints per question
-  3. Fix indentation with wrap in TUI
-  4. Add loads of tests + window fixing
-  5. Basic Persistence
-  6. Fix MC (Similarity)
+  - Add loads of tests + window fixing
+  - Basic Persistence
+  - Fix MC (Similarity)
 
 ## Progress
 ### v0.5.0
@@ -49,7 +46,7 @@ gamification of studying should further increase engagement and recall.
       - [ ] List of quizzes due for review (spaced reps)
         - [ ] Based on last time seen & mastery
       - [x] Explore the tree
-    - [ ] When asking a question display the tree path for context
+    - [x] When asking a question display the tree path for context
     - [ ] Colour coding / fancy terminal witchcraft
       - [x] Clear screen
       - [x] No return
@@ -103,4 +100,3 @@ gamification of studying should further increase engagement and recall.
 * Document the purpose of each module. Including mod.rs
 * The QuizDispatcher should be configurable and pick the most needed questions
 * If one quiz is more difficult than another, pick it for higher mastery q's (is_applicable)
-* Handle preservation of whitespace!

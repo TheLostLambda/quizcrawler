@@ -22,7 +22,7 @@ version = "*"
 features = ["derive", "rc"]
 
 [dependencies.tui]
-version = "*"
+git = "https://github.com/TheLostLambda/tui-rs.git"
 default-features = false
 features = ["crossterm"]
 
