@@ -1,7 +1,6 @@
 use super::{data::*, util::*};
 use crate::core::{
     data::Section,
-    // FIXME: Do I want this in this file? Maybe I need a type synonym file...
     quiz::{QuizProgress, QuizRef},
 };
 use tui::{
@@ -36,7 +35,6 @@ fn tree_view(section: &Section, state: &TreeState, f: &mut Frame) {
     f.render_stateful_widget(list, size, &mut list_state);
 }
 
-// FIXME: Should that answer type be a struct?
 fn question_view(
     quiz: &QuizRef,
     progress: &QuizProgress,
@@ -44,7 +42,6 @@ fn question_view(
     f: &mut Frame,
 ) {
     let size = f.size();
-    // FIXME: These messages need some refining
     let title = progress_titlebar(progress, size.width);
     let mut text = print_context(&quiz);
     text.extend(print_question(&quiz));

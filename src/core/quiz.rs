@@ -89,7 +89,6 @@ impl Dispatcher {
         }
     }
 
-    // FIXME: I'm not sure how I feel about this...
     pub fn register_quiz(&mut self, quiz: impl Quiz + 'static) {
         self.quizzes.push(Rc::new(RefCell::new(Box::new(quiz))));
     }
@@ -115,7 +114,6 @@ impl Dispatcher {
 
     fn question_progress(&self, question: &QuestionRef) -> QuestionProgress {
         let question = question.borrow();
-        // FIXME: Handle this unwrap a bit better
         let (ref_question, _) = self.reference.get(&question.id).unwrap();
         let correct = question.correct - ref_question.correct;
         let seen = question.seen - ref_question.seen;

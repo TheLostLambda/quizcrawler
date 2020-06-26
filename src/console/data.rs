@@ -18,7 +18,7 @@ pub struct Quizcrawler {
 
 #[derive(Default)]
 pub struct TreeState {
-    pub path: Vec<String>, // FIXME: Maybe Vec<String> should be a type synonym?
+    pub path: Vec<String>,
     pub selection_history: HashMap<Vec<String>, usize>,
 }
 
@@ -82,7 +82,7 @@ impl Quizcrawler {
                         let section = self.tree.child_at_path(&path).unwrap();
                         let settings = DSettings {
                             recursive: key.modifiers.contains(KeyModifiers::CONTROL),
-                            ..Default::default()
+                            ..Default::default() // FIXME: I need to add more options to DSettings
                         };
                         let mut dispatcher = Dispatcher::new(settings, section);
                         dispatcher.register_quiz(MultipleChoice::default());

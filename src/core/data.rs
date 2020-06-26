@@ -8,7 +8,12 @@ use std::{
 };
 use uuid::Uuid;
 
-// FIXME: Add some explanations
+// The reference-counter (Rc) allows for several structures to own this type at
+// once (avoiding messy lifetime tracking). The RefCell allows for the mutable
+// borrowing of the underlying question at run-time. This shifts borrow-checking
+// to run-time as the static checker can't prove this multiple ownership and
+// mutation is safe. No copies means that mutation in one part of the program is
+// always seen in the others.
 pub type QuestionRef = Rc<RefCell<Question>>;
 
 // I really don't know how I feel about these public fields...
@@ -47,14 +52,14 @@ impl Section {
     }
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub enum Strictness {
     Exact,
     Trimmed,
     Caseless,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct Question {
     pub id: Uuid,
     pub data: QuestionVariant,
@@ -66,7 +71,7 @@ pub struct Question {
 }
 
 /// Question Enum
-#[derive(Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
+#[derive(Clone, Serialize, Deserialize, PartialEq, Eq, Hash, Debug)]
 pub enum QuestionVariant {
     Term(Term),
     List(List),
@@ -74,7 +79,7 @@ pub enum QuestionVariant {
 }
 
 /// Flash Cards
-#[derive(Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
+#[derive(Clone, Serialize, Deserialize, PartialEq, Eq, Hash, Debug)]
 pub struct Term {
     term: String,
     definition: String,
@@ -83,14 +88,14 @@ pub struct Term {
 
 // Not a fan of this section having children, but I'll allow it for now
 // Also, term? item? body? Pick one.
-#[derive(Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
+#[derive(Clone, Serialize, Deserialize, PartialEq, Eq, Hash, Debug)]
 pub struct List {
     order: u32,
     item: String,
     details: Vec<String>,
 }
 
-#[derive(Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
+#[derive(Clone, Serialize, Deserialize, PartialEq, Eq, Hash, Debug)]
 pub struct Bullet {
     body: String,
 }
@@ -181,9 +186,13 @@ impl Question {
 
     pub fn override_correct(&mut self) {
         self.correct += 1;
-        self.increment_mastery();
         if self.correct > self.seen {
             self.correct = self.seen;
+        } else {
+            // Give back the mastery lost from the wrong answer
+            self.increment_mastery();
+            // Give the new mastery for being correct
+            self.increment_mastery();
         }
     }
 
@@ -216,5 +225,101 @@ impl Eq for Question {}
 impl Hash for Question {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.data.hash(state);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn make_term(t: &str, d: &str) -> Question {
+        Term::new(t.to_string(), d.to_string())
+    }
+
+    #[test]
+    fn variant_equality() {
+        let a = make_term("Bonjour", "Hello");
+        let b = make_term("Bonjour", "Hello");
+        assert_eq!(a, b);
+        assert_ne!(a.id, b.id);
+    }
+
+    #[test]
+    fn mastery_lower_bound() {
+        let mut a = make_term("", "right");
+        for _ in 1..100 {
+            a.answer("wrong");
+        }
+        assert_eq!(a.mastery, 0);
+    }
+
+    #[test]
+    fn mastery_upper_bound() {
+        let mut a = make_term("", "right");
+        for _ in 1..100 {
+            a.answer("right");
+        }
+        assert_eq!(a.mastery, 10);
+    }
+
+    #[test]
+    fn mastery_up_and_down() {
+        let mut a = make_term("", "right");
+        a.answer("right");
+        a.answer("right");
+        a.answer("right");
+        a.answer("wrong");
+        a.answer("right");
+        a.answer("wrong");
+        assert_eq!(a.mastery, 2);
+    }
+
+    #[test]
+    fn last_correct_time() {
+        let mut a = make_term("", "right");
+        let t1 = a.last_correct.clone();
+        a.answer("wrong");
+        a.answer("wrong");
+        let t2 = a.last_correct.clone();
+        a.answer("right");
+        let t3 = a.last_correct.clone();
+        assert_eq!(t1, t2);
+        assert!(t3 > t2);
+    }
+
+    #[test]
+    fn override_correct_works() {
+        let mut a = make_term("", "right");
+        a.answer("right");
+        a.answer("wrong");
+        assert!(a.correct < a.seen);
+        assert_eq!(a.mastery, 0);
+        a.override_correct();
+        assert_eq!(a.correct, a.seen);
+        assert_eq!(a.mastery, 2);
+    }
+
+    #[test]
+    fn override_correct_cant_be_cheated() {
+        let mut a = make_term("", "right");
+        a.answer("right");
+        assert_eq!(a.correct, a.seen);
+        assert_eq!(a.mastery, 1);
+        a.override_correct();
+        assert_eq!(a.correct, a.seen);
+        assert_eq!(a.mastery, 1);
+    }
+
+    #[test]
+    fn ask_term() {
+        let a = make_term("question", "right");
+        assert_eq!(a.ask(), "question");
+    }
+
+    #[test]
+    fn peek_term() {
+        let a = make_term("question", "right");
+        assert_eq!(a.peek(), "right");
+        assert_eq!(a.seen, 0);
     }
 }
