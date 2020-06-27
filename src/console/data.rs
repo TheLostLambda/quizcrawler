@@ -58,8 +58,7 @@ impl Quizcrawler {
     pub fn handle_key(&mut self, key: KeyEvent) {
         match self.state_stack.last_mut() {
             Some(State::TreeView(state)) => {
-                // FIXME: Maybe move this to a function?
-                let node = self.tree.child_at_path(&state.path).unwrap(); // FIXME: Unwrap
+                let node = self.tree.child_at_path(&state.path).unwrap();
                 let child_names: Vec<_> = node.children.iter().map(|x| &x.name).collect();
                 let limit = child_names.len() - 1;
                 let current = state.get_selected();
@@ -78,11 +77,10 @@ impl Quizcrawler {
                     KeyCode::Char(' ') => {
                         let mut path = state.path.clone();
                         path.push(child_names[current].to_owned());
-                        // FIXME: unwrap is likely a bad idea here
                         let section = self.tree.child_at_path(&path).unwrap();
                         let settings = DSettings {
                             recursive: key.modifiers.contains(KeyModifiers::CONTROL),
-                            ..Default::default() // FIXME: I need to add more options to DSettings
+                            ..Default::default()
                         };
                         let mut dispatcher = Dispatcher::new(settings, section);
                         dispatcher.register_quiz(MultipleChoice::default());
@@ -101,7 +99,7 @@ impl Quizcrawler {
                             // FIXME: This double-pop is hacky and is needed to get past the dispatcher
                             // Write a rewind function to pop the stack back until some condition is met,
                             // like reaching something isn't Dispatch. Maybe the states could have a
-                            // transient flag and all of those are popped off.
+                            // transient flag and all of those are popped off. Yeah, let's add an "invisible" flag.
                             self.state_stack.pop();
                             self.state_stack.pop();
                         }

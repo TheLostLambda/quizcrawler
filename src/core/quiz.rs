@@ -2,6 +2,7 @@ use super::data::{Question, QuestionRef, QuestionVariant, Section};
 use rand::{prelude::*, seq::IteratorRandom};
 use std::{
     cell::RefCell,
+    cmp,
     collections::{HashMap, HashSet},
     rc::Rc,
 };
@@ -35,16 +36,26 @@ pub struct QuestionCtx {
 }
 
 // FIXME: Ensure that all "settings" structs implement Copy
-#[derive(Default, Clone, Copy)]
+#[derive(Clone, Copy)]
 pub struct DSettings {
     pub recursive: bool,
+    pub quiz_length: usize,
+}
+
+impl Default for DSettings {
+    fn default() -> Self {
+        DSettings {
+            recursive: false,
+            quiz_length: 20,
+        }
+    }
 }
 
 pub struct Dispatcher {
     questions: Vec<QuestionRef>,
     quizzes: Vec<QuizRef>,
     reference: HashMap<Uuid, (Question, Vec<String>)>, // FIXME: Should I really be lumping Question and Vec<String> together?
-    _settings: DSettings,
+    settings: DSettings,
     rng: ThreadRng,
 }
 
@@ -84,7 +95,7 @@ impl Dispatcher {
             questions: ctx.questions,
             quizzes: Vec::new(),
             reference: ctx.reference,
-            _settings: settings,
+            settings,
             rng: thread_rng(),
         }
     }
@@ -96,19 +107,27 @@ impl Dispatcher {
     /// Returns the number of questions in the set, how many have been learned,
     /// and the current score as a percentage
     pub fn progress(&self) -> QuizProgress {
+        let questions = cmp::min(self.settings.quiz_length, self.questions.len());
         QuizProgress {
-            questions: self.questions.len(),
-            learned: self.questions.len() - self.remaining_questions().len(),
+            questions,
+            learned: questions - self.remaining_questions().len(),
             score: self.score(),
         }
     }
 
     // FIXME: Add a configurable mastery threshold for progression
     fn remaining_questions(&self) -> Vec<QuestionRef> {
+        let mut todo: Vec<_> = self.reference.values().collect();
+        todo.sort_unstable_by_key(|(q, _)| q.mastery);
         self.questions
             .iter()
             .cloned()
-            .filter(|q| self.question_progress(q).correct < 1)
+            .filter(|q| {
+                todo.iter()
+                    .take(self.settings.quiz_length)
+                    .any(|(x, _)| x.id == q.borrow().id)
+                    && self.question_progress(q).correct < 1
+            })
             .collect()
     }
 
