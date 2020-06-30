@@ -7,7 +7,7 @@ leverages spaced repetition and forced / active recall to enhance learning. The
 gamification of studying should further increase engagement and recall.
 
 ## What am I doing now?
-  - Add loads of tests + window fixing [3 cyl]
+  - Add loads of tests + window fixing (state-stack) [2 cyl]
   - Basic Persistence
   - Fix MC (Similarity)
 

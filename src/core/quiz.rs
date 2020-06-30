@@ -8,12 +8,12 @@ use std::{
 };
 use uuid::Uuid;
 
-// FIXME: Add some explanations
+// Like QuestionRef, this allows for multiple ownership, run-time borrow-checking
+// and holds a trait-object (anything that implements the Quiz trait). This
+// enables dynamic dispatch and makes it possible to store a Vec of QuizRefs
+// that refer to different types of quizzes
 pub type QuizRef = Rc<RefCell<Box<dyn Quiz>>>;
 
-// FIXME: (QuestionRef, Vec<String>) needs a type synonym?
-
-// FIXME: Where do I belong?
 #[derive(Clone, Copy)]
 pub struct QuizProgress {
     pub questions: usize,
@@ -21,14 +21,12 @@ pub struct QuizProgress {
     pub score: f64,
 }
 
-// FIXME: Where do I belong?
 #[derive(Clone, Copy)]
 pub struct QuestionProgress {
     pub correct: usize,
     pub seen: usize,
 }
 
-// FIXME: Where do I belong?
 #[derive(Default, Clone)]
 pub struct QuestionCtx {
     pub path: Vec<String>,
@@ -61,7 +59,6 @@ pub struct Dispatcher {
 
 // FIXME: Should this use the builder pattern?
 impl Dispatcher {
-    // FIXME: Should "settings" be the first or second argument?
     /// Set the list of `Question`'s to ask and `Quiz`'s to be dispatched
     pub fn new(settings: DSettings, section: &Section) -> Self {
         // FIXME: Add some explanations
@@ -213,7 +210,7 @@ pub trait Quiz {
     /// is applicable to that variant
     fn is_applicable(&self, q: &Question) -> bool;
 }
-
+#[derive(Clone, Copy)]
 pub struct MCSettings {
     /// The number of answer choices for each question
     pub choices: usize,

@@ -52,7 +52,8 @@ fn question_view(
     }
     let list = Paragraph::new(text.iter())
         .block(titled_block(&title))
-        .wrap(true);
+        .wrap(true)
+        .trim_wrapped(false);
     f.render_widget(list, size);
 }
 

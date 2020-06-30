@@ -7,7 +7,7 @@ use std::collections::HashMap;
 
 // Trim back things that don't need to be public
 
-#[derive(Default)]
+#[derive(Clone, Copy, Default)]
 pub struct QCSettings {}
 
 pub struct Quizcrawler {
@@ -46,6 +46,13 @@ pub enum State {
     AnswerQuestion(QuestionState, (bool, String)), // FIXME: Ew
 }
 
+impl State {
+    /// If a state is marked as "transient", it's skipped over when state is being rewinded
+    fn transient(&self) -> bool {
+        matches!(self, State::Dispatch(_))
+    }
+}
+
 impl Quizcrawler {
     pub fn new(settings: QCSettings, tree: Section) -> Self {
         Self {
@@ -66,7 +73,7 @@ impl Quizcrawler {
                 let selector = state.get_selected_mut();
                 match key.code {
                     KeyCode::Char('q') => {
-                        self.state_stack.pop();
+                        self.rewind();
                     }
                     KeyCode::Up if current > 0 => *selector -= 1,
                     KeyCode::Down if current < limit => *selector += 1,
@@ -96,12 +103,7 @@ impl Quizcrawler {
                 if !state.quiz.borrow().get_choices().is_empty() {
                     match key.code {
                         KeyCode::Char('q') => {
-                            // FIXME: This double-pop is hacky and is needed to get past the dispatcher
-                            // Write a rewind function to pop the stack back until some condition is met,
-                            // like reaching something isn't Dispatch. Maybe the states could have a
-                            // transient flag and all of those are popped off. Yeah, let's add an "invisible" flag.
-                            self.state_stack.pop();
-                            self.state_stack.pop();
+                            self.rewind();
                         }
                         KeyCode::Char('h') => state.quiz.borrow_mut().get_hint(),
                         KeyCode::Char(c) => {
@@ -118,9 +120,7 @@ impl Quizcrawler {
             }
             Some(State::AnswerQuestion(state, (correct, _))) => match key.code {
                 KeyCode::Char('q') => {
-                    // FIXME: Hacky double-pop
-                    self.state_stack.pop();
-                    self.state_stack.pop();
+                    self.rewind();
                 }
                 KeyCode::Char('o') if !*correct => {
                     state.quiz.borrow_mut().i_was_right();
@@ -143,12 +143,24 @@ impl Quizcrawler {
                     let state = QuestionState { quiz, progress };
                     self.state_stack.push(State::AskQuestion(state));
                 } else {
-                    self.state_stack.pop();
+                    self.rewind();
                 }
                 true
             }
             Some(_) => true,
             None => false,
+        }
+    }
+
+    // FIXME: Pull this out into a state_stack struct. Also add swap for swapping the current state
+    fn rewind(&mut self) {
+        self.state_stack.pop();
+        while !self.state_stack.is_empty() {
+            if self.state_stack.last().unwrap().transient() {
+                self.state_stack.pop();
+            } else {
+                break;
+            }
         }
     }
 }
