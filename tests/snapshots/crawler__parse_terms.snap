@@ -1,6 +1,6 @@
 ---
 source: tests/crawler.rs
-expression: cards
+expression: section
 ---
 [
   Section(
@@ -17,6 +17,7 @@ expression: cards
         mastery: 0,
         correct: 0,
         seen: 0,
+        hints: 0,
         last_correct: "[last_correct]",
       ),
       Question(
@@ -30,6 +31,7 @@ expression: cards
         mastery: 0,
         correct: 0,
         seen: 0,
+        hints: 0,
         last_correct: "[last_correct]",
       ),
       Question(
@@ -43,6 +45,7 @@ expression: cards
         mastery: 0,
         correct: 0,
         seen: 0,
+        hints: 0,
         last_correct: "[last_correct]",
       ),
     ],

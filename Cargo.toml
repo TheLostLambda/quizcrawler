@@ -7,11 +7,13 @@ edition = "2018"
 [dependencies]
 clap = "*"
 crossterm = "*"
+derive_more = "*"
 onig = "*"
 rand = "*"
 ron = "*"
 structopt = "*"
 toml = "*"
+unicode-segmentation = "*"
 
 [dependencies.insta]
 version = "*"
@@ -22,7 +24,7 @@ version = "*"
 features = ["derive", "rc"]
 
 [dependencies.tui]
-git = "https://github.com/TheLostLambda/tui-rs.git"
+git = "https://github.com/fdehau/tui-rs.git"
 default-features = false
 features = ["crossterm"]
 

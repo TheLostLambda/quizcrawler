@@ -46,6 +46,7 @@ pub enum State {
     AnswerQuestion(QuestionState, (bool, String)), // FIXME: Ew
 }
 
+// FIXME: I might get rid of this in favour of the double-pop method
 impl State {
     /// If a state is marked as "transient", it's skipped over when state is being rewinded
     fn transient(&self) -> bool {
@@ -152,7 +153,7 @@ impl Quizcrawler {
         }
     }
 
-    // FIXME: Pull this out into a state_stack struct. Also add swap for swapping the current state
+    // FIXME: Might abstract this out into a stack type with a swap operation, or get rid of it
     fn rewind(&mut self) {
         self.state_stack.pop();
         while !self.state_stack.is_empty() {

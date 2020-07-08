@@ -128,7 +128,6 @@ impl Crawler {
     }
 
     // This feels a tad out of place
-    // FIXME: Needs some testing too
     pub fn parse_file(&self, filename: &str) -> Section {
         let src = fs::read_to_string(filename).unwrap();
         Section::new(

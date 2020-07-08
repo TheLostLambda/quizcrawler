@@ -22,8 +22,8 @@ fn test_parse_terms() {
   - wissen / weiß / hat gewusst :: to know
   - in der Zwischenzeit :: [in the] meantime"#;
 
-    let cards = crawler().parse_sections(data_str);
-    assert_ron_snapshot!(cards, {".**.last_correct" => "[last_correct]", ".**.id" => "[id]"});
+    let section = crawler().parse_sections(data_str);
+    assert_ron_snapshot!(section, {".**.last_correct" => "[last_correct]", ".**.id" => "[id]"});
 }
 
 #[test]
@@ -35,8 +35,8 @@ fn test_parse_lists() {
   2) This, for example, happens after the first point.
   3) Or perhaps this is the third most expensive solution."#;
 
-    let cards = crawler().parse_sections(data_str);
-    assert_ron_snapshot!(cards, {".**.last_correct" => "[last_correct]", ".**.id" => "[id]"});
+    let section = crawler().parse_sections(data_str);
+    assert_ron_snapshot!(section, {".**.last_correct" => "[last_correct]", ".**.id" => "[id]"});
 }
 
 #[test]
@@ -47,8 +47,8 @@ fn test_parse_bullets() {
   - And another one! Only use these when there is no better option.
   - Definitions and processes have their own structures."#;
 
-    let cards = crawler().parse_sections(data_str);
-    assert_ron_snapshot!(cards, {".**.last_correct" => "[last_correct]", ".**.id" => "[id]"});
+    let section = crawler().parse_sections(data_str);
+    assert_ron_snapshot!(section, {".**.last_correct" => "[last_correct]", ".**.id" => "[id]"});
 }
 
 #[test]
@@ -62,6 +62,12 @@ fn test_parse_multiline_terms() {
     engagement and recall.
 "#;
 
-    let cards = crawler().parse_sections(data_str);
-    assert_ron_snapshot!(cards, {".**.last_correct" => "[last_correct]", ".**.id" => "[id]"});
+    let section = crawler().parse_sections(data_str);
+    assert_ron_snapshot!(section, {".**.last_correct" => "[last_correct]", ".**.id" => "[id]"});
+}
+
+#[test]
+fn test_parse_file() {
+    let section = crawler().parse_file("tests/data/borg.org");
+    assert_ron_snapshot!(section, {".**.last_correct" => "[last_correct]", ".**.id" => "[id]"});
 }

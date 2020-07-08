@@ -1,4 +1,5 @@
 use super::data::{Question, QuestionRef, QuestionVariant, Section};
+use derive_more::{Add, Sum};
 use rand::{prelude::*, seq::IteratorRandom};
 use std::{
     cell::RefCell,
@@ -18,13 +19,14 @@ pub type QuizRef = Rc<RefCell<Box<dyn Quiz>>>;
 pub struct QuizProgress {
     pub questions: usize,
     pub learned: usize,
-    pub score: f64,
+    pub score: Option<f64>,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Add, Sum)]
 pub struct QuestionProgress {
     pub correct: usize,
     pub seen: usize,
+    pub hints: f64,
 }
 
 #[derive(Default, Clone)]
@@ -133,20 +135,24 @@ impl Dispatcher {
         let (ref_question, _) = self.reference.get(&question.id).unwrap();
         let correct = question.correct - ref_question.correct;
         let seen = question.seen - ref_question.seen;
-        QuestionProgress { correct, seen }
+        let hints = question.hints - ref_question.hints;
+        QuestionProgress {
+            correct,
+            seen,
+            hints,
+        }
     }
 
-    fn score(&self) -> f64 {
-        let (mut correct, mut seen) = (0, 0);
-        for q in &self.questions {
-            let progress = self.question_progress(q);
-            correct += progress.correct;
-            seen += progress.seen;
-        }
-        if seen > 0 {
-            (correct as f64 / seen as f64) * 100.0
+    fn score(&self) -> Option<f64> {
+        let overall: QuestionProgress = self
+            .questions
+            .iter()
+            .map(|q| self.question_progress(q))
+            .sum();
+        if overall.seen > 0 {
+            Some((overall.correct as f64 - overall.hints) / overall.seen as f64 * 100.0)
         } else {
-            -1.0
+            None
         }
     }
 }
@@ -303,7 +309,8 @@ impl Quiz for MultipleChoice {
         match self.question {
             Some(ref q) if 0 < n && n <= choices.len() => {
                 let mut q = q.borrow_mut();
-                let (correct, answer) = q.answer(&choices[n - 1]);
+                let hints = 1.0 - self.choices.len() as f64 / self.settings.choices as f64;
+                let (correct, answer) = q.answer(&choices[n - 1], hints);
                 Some((correct, answer.to_string()))
             }
             _ => None,

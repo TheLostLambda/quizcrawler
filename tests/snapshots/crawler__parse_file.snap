@@ -1,0 +1,571 @@
+---
+source: tests/crawler.rs
+expression: section
+---
+Section(
+  name: "borg.org",
+  questions: [],
+  children: [
+    Section(
+      name: "Professors",
+      questions: [
+        Question(
+          id: "[id]",
+          data: Bullet(Bullet(
+            body: "Prof. Joe Generic (j.generic@sheffield.ac.uk)",
+          )),
+          comp_level: Trimmed,
+          mastery: 0,
+          correct: 0,
+          seen: 0,
+          hints: 0,
+          last_correct: "[last_correct]",
+        ),
+        Question(
+          id: "[id]",
+          data: Bullet(Bullet(
+            body: "Dr. Bob Assistant (b.assistant@sheffield.ac.uk)",
+          )),
+          comp_level: Trimmed,
+          mastery: 0,
+          correct: 0,
+          seen: 0,
+          hints: 0,
+          last_correct: "[last_correct]",
+        ),
+      ],
+      children: [],
+    ),
+    Section(
+      name: "Resources",
+      questions: [
+        Question(
+          id: "[id]",
+          data: Bullet(Bullet(
+            body: "Link to a textbook",
+          )),
+          comp_level: Trimmed,
+          mastery: 0,
+          correct: 0,
+          seen: 0,
+          hints: 0,
+          last_correct: "[last_correct]",
+        ),
+        Question(
+          id: "[id]",
+          data: Bullet(Bullet(
+            body: "A neat webpage",
+          )),
+          comp_level: Trimmed,
+          mastery: 0,
+          correct: 0,
+          seen: 0,
+          hints: 0,
+          last_correct: "[last_correct]",
+        ),
+        Question(
+          id: "[id]",
+          data: Bullet(Bullet(
+            body: "A relevant paper",
+          )),
+          comp_level: Trimmed,
+          mastery: 0,
+          correct: 0,
+          seen: 0,
+          hints: 0,
+          last_correct: "[last_correct]",
+        ),
+        Question(
+          id: "[id]",
+          data: Bullet(Bullet(
+            body: "Etc.",
+          )),
+          comp_level: Trimmed,
+          mastery: 0,
+          correct: 0,
+          seen: 0,
+          hints: 0,
+          last_correct: "[last_correct]",
+        ),
+      ],
+      children: [],
+    ),
+    Section(
+      name: "Assignments",
+      questions: [],
+      children: [
+        Section(
+          name: "TODO [#A] This is an important and time-sensitive assignment!",
+          questions: [],
+          children: [],
+        ),
+        Section(
+          name: "TODO [#B] This is less urgent but needs to done in a timely manner.",
+          questions: [],
+          children: [],
+        ),
+        Section(
+          name: "TODO [#C] This is something that I\'d like to do but can wait.",
+          questions: [],
+          children: [],
+        ),
+      ],
+    ),
+    Section(
+      name: "Notes",
+      questions: [],
+      children: [
+        Section(
+          name: "Theme I",
+          questions: [],
+          children: [
+            Section(
+              name: "Topic 1",
+              questions: [
+                Question(
+                  id: "[id]",
+                  data: Bullet(Bullet(
+                    body: "This is information that is relevant to the topic as a whole",
+                  )),
+                  comp_level: Trimmed,
+                  mastery: 0,
+                  correct: 0,
+                  seen: 0,
+                  hints: 0,
+                  last_correct: "[last_correct]",
+                ),
+                Question(
+                  id: "[id]",
+                  data: Bullet(Bullet(
+                    body: "This section should be small. Try to use subtopics where possible.",
+                  )),
+                  comp_level: Trimmed,
+                  mastery: 0,
+                  correct: 0,
+                  seen: 0,
+                  hints: 0,
+                  last_correct: "[last_correct]",
+                ),
+              ],
+              children: [
+                Section(
+                  name: "Subtopic A",
+                  questions: [
+                    Question(
+                      id: "[id]",
+                      data: Bullet(Bullet(
+                        body: "Here is some short, relevant fact regarding this subtopic.",
+                      )),
+                      comp_level: Trimmed,
+                      mastery: 0,
+                      correct: 0,
+                      seen: 0,
+                      hints: 0,
+                      last_correct: "[last_correct]",
+                    ),
+                    Question(
+                      id: "[id]",
+                      data: Bullet(Bullet(
+                        body: "And another one! Only use these when there is no better option.",
+                      )),
+                      comp_level: Trimmed,
+                      mastery: 0,
+                      correct: 0,
+                      seen: 0,
+                      hints: 0,
+                      last_correct: "[last_correct]",
+                    ),
+                    Question(
+                      id: "[id]",
+                      data: Bullet(Bullet(
+                        body: "Definitions and processes have their own structures.",
+                      )),
+                      comp_level: Trimmed,
+                      mastery: 0,
+                      correct: 0,
+                      seen: 0,
+                      hints: 0,
+                      last_correct: "[last_correct]",
+                    ),
+                  ],
+                  children: [],
+                ),
+                Section(
+                  name: "Subtopic B",
+                  questions: [
+                    Question(
+                      id: "[id]",
+                      data: List(List(
+                        order: 1,
+                        item: "Use numbers to indicate some sort of process or ranking.",
+                        details: [
+                          "This is an annotation about this step in the process.",
+                        ],
+                      )),
+                      comp_level: Trimmed,
+                      mastery: 0,
+                      correct: 0,
+                      seen: 0,
+                      hints: 0,
+                      last_correct: "[last_correct]",
+                    ),
+                    Question(
+                      id: "[id]",
+                      data: List(List(
+                        order: 2,
+                        item: "This, for example, happens after the first point.",
+                        details: [],
+                      )),
+                      comp_level: Trimmed,
+                      mastery: 0,
+                      correct: 0,
+                      seen: 0,
+                      hints: 0,
+                      last_correct: "[last_correct]",
+                    ),
+                    Question(
+                      id: "[id]",
+                      data: List(List(
+                        order: 3,
+                        item: "Or perhaps this is the third most expensive solution.",
+                        details: [],
+                      )),
+                      comp_level: Trimmed,
+                      mastery: 0,
+                      correct: 0,
+                      seen: 0,
+                      hints: 0,
+                      last_correct: "[last_correct]",
+                    ),
+                  ],
+                  children: [],
+                ),
+                Section(
+                  name: "Subtopic C",
+                  questions: [
+                    Question(
+                      id: "[id]",
+                      data: Term(Term(
+                        term: "Term",
+                        definition: "Definition (This is for vocabulary)",
+                        inverted: false,
+                      )),
+                      comp_level: Trimmed,
+                      mastery: 0,
+                      correct: 0,
+                      seen: 0,
+                      hints: 0,
+                      last_correct: "[last_correct]",
+                    ),
+                    Question(
+                      id: "[id]",
+                      data: Term(Term(
+                        term: "Term",
+                        definition: "Another definition (sometimes these are better suited as subtopics)",
+                        inverted: false,
+                      )),
+                      comp_level: Trimmed,
+                      mastery: 0,
+                      correct: 0,
+                      seen: 0,
+                      hints: 0,
+                      last_correct: "[last_correct]",
+                    ),
+                    Question(
+                      id: "[id]",
+                      data: Term(Term(
+                        term: "Term",
+                        definition: "Def. (if so, don\'t use this format — just create a new heading)",
+                        inverted: false,
+                      )),
+                      comp_level: Trimmed,
+                      mastery: 0,
+                      correct: 0,
+                      seen: 0,
+                      hints: 0,
+                      last_correct: "[last_correct]",
+                    ),
+                  ],
+                  children: [],
+                ),
+              ],
+            ),
+            Section(
+              name: "Topic 2",
+              questions: [],
+              children: [
+                Section(
+                  name: "Subtopic A",
+                  questions: [
+                    Question(
+                      id: "[id]",
+                      data: Bullet(Bullet(
+                        body: "Some points regarding emphasis",
+                      )),
+                      comp_level: Trimmed,
+                      mastery: 0,
+                      correct: 0,
+                      seen: 0,
+                      hints: 0,
+                      last_correct: "[last_correct]",
+                    ),
+                    Question(
+                      id: "[id]",
+                      data: Bullet(Bullet(
+                        body: "/italic words/ are vocabulary words and are part of the topical vernacular.",
+                      )),
+                      comp_level: Trimmed,
+                      mastery: 0,
+                      correct: 0,
+                      seen: 0,
+                      hints: 0,
+                      last_correct: "[last_correct]",
+                    ),
+                    Question(
+                      id: "[id]",
+                      data: Bullet(Bullet(
+                        body: "*Bold words* are buzzwords or important concepts. Key ideas are in bold.",
+                      )),
+                      comp_level: Trimmed,
+                      mastery: 0,
+                      correct: 0,
+                      seen: 0,
+                      hints: 0,
+                      last_correct: "[last_correct]",
+                    ),
+                    Question(
+                      id: "[id]",
+                      data: Bullet(Bullet(
+                        body: "_Underlined words_ are proper nouns — like the names of organizations.",
+                      )),
+                      comp_level: Trimmed,
+                      mastery: 0,
+                      correct: 0,
+                      seen: 0,
+                      hints: 0,
+                      last_correct: "[last_correct]",
+                    ),
+                    Question(
+                      id: "[id]",
+                      data: Bullet(Bullet(
+                        body: "~Code segments~ may be useful for courses to do with programming.",
+                      )),
+                      comp_level: Trimmed,
+                      mastery: 0,
+                      correct: 0,
+                      seen: 0,
+                      hints: 0,
+                      last_correct: "[last_correct]",
+                    ),
+                  ],
+                  children: [],
+                ),
+              ],
+            ),
+          ],
+        ),
+        Section(
+          name: "Theme II",
+          questions: [],
+          children: [
+            Section(
+              name: "Topic 1",
+              questions: [
+                Question(
+                  id: "[id]",
+                  data: Bullet(Bullet(
+                    body: "Avoid putting text at any level higher than Topic (3).",
+                  )),
+                  comp_level: Trimmed,
+                  mastery: 0,
+                  correct: 0,
+                  seen: 0,
+                  hints: 0,
+                  last_correct: "[last_correct]",
+                ),
+              ],
+              children: [
+                Section(
+                  name: "Subtopic A",
+                  questions: [
+                    Question(
+                      id: "[id]",
+                      data: Bullet(Bullet(
+                        body: "Here are a couple of general notes",
+                      )),
+                      comp_level: Trimmed,
+                      mastery: 0,
+                      correct: 0,
+                      seen: 0,
+                      hints: 0,
+                      last_correct: "[last_correct]",
+                    ),
+                    Question(
+                      id: "[id]",
+                      data: Bullet(Bullet(
+                        body: "You can, and sometimes should, have more than 1 layer of subtopics",
+                      )),
+                      comp_level: Trimmed,
+                      mastery: 0,
+                      correct: 0,
+                      seen: 0,
+                      hints: 0,
+                      last_correct: "[last_correct]",
+                    ),
+                    Question(
+                      id: "[id]",
+                      data: Bullet(Bullet(
+                        body: "Avoid any bare text (nothing outside of ordered, unordered, or term lists)",
+                      )),
+                      comp_level: Trimmed,
+                      mastery: 0,
+                      correct: 0,
+                      seen: 0,
+                      hints: 0,
+                      last_correct: "[last_correct]",
+                    ),
+                    Question(
+                      id: "[id]",
+                      data: Bullet(Bullet(
+                        body: "Images are allowed to be bare (without a preceding bullet)",
+                      )),
+                      comp_level: Trimmed,
+                      mastery: 0,
+                      correct: 0,
+                      seen: 0,
+                      hints: 0,
+                      last_correct: "[last_correct]",
+                    ),
+                    Question(
+                      id: "[id]",
+                      data: Bullet(Bullet(
+                        body: "Never indent a list. If it needs more structure, split into subtopics.",
+                      )),
+                      comp_level: Trimmed,
+                      mastery: 0,
+                      correct: 0,
+                      seen: 0,
+                      hints: 0,
+                      last_correct: "[last_correct]",
+                    ),
+                    Question(
+                      id: "[id]",
+                      data: Bullet(Bullet(
+                        body: "Equations are subtopics with a bullet for LaTeX + variables : definitions",
+                      )),
+                      comp_level: Trimmed,
+                      mastery: 0,
+                      correct: 0,
+                      seen: 0,
+                      hints: 0,
+                      last_correct: "[last_correct]",
+                    ),
+                  ],
+                  children: [],
+                ),
+                Section(
+                  name: "Table B",
+                  questions: [
+                    Question(
+                      id: "[id]",
+                      data: Bullet(Bullet(
+                        body: "FIXME: Eventually put a table here!",
+                      )),
+                      comp_level: Trimmed,
+                      mastery: 0,
+                      correct: 0,
+                      seen: 0,
+                      hints: 0,
+                      last_correct: "[last_correct]",
+                    ),
+                  ],
+                  children: [],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    ),
+    Section(
+      name: "Scratch",
+      questions: [
+        Question(
+          id: "[id]",
+          data: List(List(
+            order: 1,
+            item: "This",
+            details: [],
+          )),
+          comp_level: Trimmed,
+          mastery: 0,
+          correct: 0,
+          seen: 0,
+          hints: 0,
+          last_correct: "[last_correct]",
+        ),
+        Question(
+          id: "[id]",
+          data: List(List(
+            order: 2,
+            item: "Then",
+            details: [],
+          )),
+          comp_level: Trimmed,
+          mastery: 0,
+          correct: 0,
+          seen: 0,
+          hints: 0,
+          last_correct: "[last_correct]",
+        ),
+        Question(
+          id: "[id]",
+          data: List(List(
+            order: 3,
+            item: "That",
+            details: [
+              "[[file:.orgimg/Scratch/screenshot_2019-04-08_14-05-47.png]] You don\'t even need lists to structure things here. This space is just meant to be a buffer for content that eventually makes its way into the notes section. As such, headings aren\'t anything special here:",
+            ],
+          )),
+          comp_level: Trimmed,
+          mastery: 0,
+          correct: 0,
+          seen: 0,
+          hints: 0,
+          last_correct: "[last_correct]",
+        ),
+        Question(
+          id: "[id]",
+          data: Bullet(Bullet(
+            body: "This is a free space for dropping in-class notes",
+          )),
+          comp_level: Trimmed,
+          mastery: 0,
+          correct: 0,
+          seen: 0,
+          hints: 0,
+          last_correct: "[last_correct]",
+        ),
+        Question(
+          id: "[id]",
+          data: Bullet(Bullet(
+            body: "There is no real structure here, so previous rules don\'t apply",
+          )),
+          comp_level: Trimmed,
+          mastery: 0,
+          correct: 0,
+          seen: 0,
+          hints: 0,
+          last_correct: "[last_correct]",
+        ),
+      ],
+      children: [
+        Section(
+          name: "Here \'cause I want to be",
+          questions: [],
+          children: [],
+        ),
+      ],
+    ),
+  ],
+)

@@ -6,7 +6,7 @@ use crate::core::{
 use tui::{
     style::{Color, Modifier, Style},
     symbols::line,
-    widgets::{Block, BorderType, Borders, List, ListState, Paragraph, Text},
+    widgets::{Block, BorderType, Borders, List, ListState, Paragraph, Text, Wrap},
 };
 // FIXME: Good lord, this file needs some cleaning...
 
@@ -24,7 +24,10 @@ impl Quizcrawler {
 fn tree_view(section: &Section, state: &TreeState, f: &mut Frame) {
     let size = f.size();
     let node = section.child_at_path(&state.path).unwrap();
-    let child_names = node.children.iter().map(|x| Text::raw(&x.name));
+    let child_names = node
+        .children
+        .iter()
+        .map(|x| Text::raw(compact_title(&x.name, size.width as usize - 3)));
     let selected_node = &node.children[state.get_selected()]; // FIXME: This panics
     let mut list_state = ListState::default();
     list_state.select(Some(state.get_selected()));
@@ -52,8 +55,7 @@ fn question_view(
     }
     let list = Paragraph::new(text.iter())
         .block(titled_block(&title))
-        .wrap(true)
-        .trim_wrapped(false);
+        .wrap(Wrap { trim: false });
     f.render_widget(list, size);
 }
 
@@ -95,11 +97,9 @@ fn print_answer(correct: bool, answer: &str) -> Vec<Text> {
     }
 }
 
-// FIXME: This should also shorten the path when it gets too long
 fn tree_titlebar(root: &str, rest: &[String], selected: &Section, width: u16) -> String {
     let mut path = vec![root.to_owned()];
     path.extend(rest.to_vec());
-    let path = path.join("/");
     let children = selected.children.len();
     let questions = selected.questions.len();
     let info = format!(
@@ -109,16 +109,19 @@ fn tree_titlebar(root: &str, rest: &[String], selected: &Section, width: u16) ->
         questions,
         if questions == 1 { "" } else { "s" }
     );
+    // The 3 is from both corners plus the spacer between right and left
+    let target_len = (width as usize)
+        .checked_sub(grapheme_len(&info) + 3)
+        .unwrap_or_default();
+    let path = compact_path(&path[..], "/", target_len);
     render_titlebar(path, line::HORIZONTAL, info, width)
 }
 
 fn progress_titlebar(progress: &QuizProgress, width: u16) -> String {
     let learned = format!("Learned {} of {}", progress.learned, progress.questions);
-    let score = if progress.score >= 0.0 {
-        format!("Your score is {:.2}%", progress.score)
-    } else {
-        String::new()
-    };
+    let score = progress
+        .score
+        .map_or(String::new(), |s| format!("Your score is {:.2}%", s));
     render_titlebar(learned, line::HORIZONTAL, score, width)
 }
 

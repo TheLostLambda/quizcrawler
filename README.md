@@ -7,7 +7,6 @@ leverages spaced repetition and forced / active recall to enhance learning. The
 gamification of studying should further increase engagement and recall.
 
 ## What am I doing now?
-  - Add loads of tests + window fixing (state-stack) [2 cyl]
   - Basic Persistence
   - Fix MC (Similarity)
 
@@ -100,3 +99,4 @@ gamification of studying should further increase engagement and recall.
 * Document the purpose of each module. Including mod.rs
 * The QuizDispatcher should be configurable and pick the most needed questions
 * If one quiz is more difficult than another, pick it for higher mastery q's (is_applicable)
+* Crawler should try to find a title at the top of a file, falling back to the filename

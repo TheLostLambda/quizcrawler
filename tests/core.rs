@@ -17,9 +17,6 @@ fn crawler() -> Crawler {
 // It's a little bit gross to have crawler stuff in the core test file, but
 // generating sections to test is messy without the crawler
 
-// FIXME: I need to decide if data_str should be a constant or a let everywhere
-// I'm leaning towards changing things to be `const`
-
 #[test]
 fn find_child_at_path() {
     let data_str = r#"

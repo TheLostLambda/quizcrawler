@@ -68,6 +68,7 @@ pub struct Question {
     pub mastery: u8,            // 0-10 (Leitner System)
     pub correct: usize,
     pub seen: usize,
+    pub hints: f64,
     pub last_correct: SystemTime,
 }
 
@@ -141,6 +142,7 @@ impl Question {
             mastery: 0,
             correct: 0,
             seen: 0,
+            hints: 0.0,
             last_correct: SystemTime::now(),
         }
     }
@@ -171,14 +173,17 @@ impl Question {
         }
     }
 
-    pub fn answer(&mut self, ans: &str) -> (bool, &str) {
+    pub fn answer(&mut self, ans: &str, hints: f64) -> (bool, &str) {
         let right_ans = self.peek().to_owned();
         let correct = logic::check_answer(ans, &right_ans, &self.comp_level);
         self.seen += 1;
         if correct {
             self.correct += 1;
-            self.increment_mastery();
-            self.last_correct = SystemTime::now();
+            self.hints += hints;
+            if hints == 0.0 {
+                self.increment_mastery();
+                self.last_correct = SystemTime::now();
+            }
         } else {
             self.decrement_mastery();
         }
@@ -249,7 +254,7 @@ mod tests {
     fn mastery_lower_bound() {
         let mut a = make_term("", "right");
         for _ in 1..100 {
-            a.answer("wrong");
+            a.answer("wrong", 0.0);
         }
         assert_eq!(a.mastery, 0);
     }
@@ -258,7 +263,7 @@ mod tests {
     fn mastery_upper_bound() {
         let mut a = make_term("", "right");
         for _ in 1..100 {
-            a.answer("right");
+            a.answer("right", 0.0);
         }
         assert_eq!(a.mastery, 10);
     }
@@ -266,12 +271,12 @@ mod tests {
     #[test]
     fn mastery_up_and_down() {
         let mut a = make_term("", "right");
-        a.answer("right");
-        a.answer("right");
-        a.answer("right");
-        a.answer("wrong");
-        a.answer("right");
-        a.answer("wrong");
+        a.answer("right", 0.0);
+        a.answer("right", 0.0);
+        a.answer("right", 0.0);
+        a.answer("wrong", 0.0);
+        a.answer("right", 0.0);
+        a.answer("wrong", 0.0);
         assert_eq!(a.mastery, 2);
     }
 
@@ -279,10 +284,10 @@ mod tests {
     fn last_correct_time() {
         let mut a = make_term("", "right");
         let t1 = a.last_correct.clone();
-        a.answer("wrong");
-        a.answer("wrong");
+        a.answer("wrong", 0.0);
+        a.answer("wrong", 0.0);
         let t2 = a.last_correct.clone();
-        a.answer("right");
+        a.answer("right", 0.0);
         let t3 = a.last_correct.clone();
         assert_eq!(t1, t2);
         assert!(t3 > t2);
@@ -291,8 +296,8 @@ mod tests {
     #[test]
     fn override_correct_works() {
         let mut a = make_term("", "right");
-        a.answer("right");
-        a.answer("wrong");
+        a.answer("right", 0.0);
+        a.answer("wrong", 0.0);
         assert!(a.correct < a.seen);
         assert_eq!(a.mastery, 0);
         a.override_correct();
@@ -303,7 +308,7 @@ mod tests {
     #[test]
     fn override_correct_cant_be_cheated() {
         let mut a = make_term("", "right");
-        a.answer("right");
+        a.answer("right", 0.0);
         assert_eq!(a.correct, a.seen);
         assert_eq!(a.mastery, 1);
         a.override_correct();
