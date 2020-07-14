@@ -4,9 +4,10 @@ use crate::core::{
     quiz::{QuizProgress, QuizRef},
 };
 use tui::{
-    style::{Color, Modifier, Style},
+    style::{Color, Modifier, StyleDiff},
     symbols::line,
-    widgets::{Block, BorderType, Borders, List, ListState, Paragraph, Text, Wrap},
+    text::{Span, Spans},
+    widgets::{Block, BorderType, Borders, List, ListItem, ListState, Paragraph, Wrap},
 };
 // FIXME: Good lord, this file needs some cleaning...
 
@@ -24,10 +25,11 @@ impl Quizcrawler {
 fn tree_view(section: &Section, state: &TreeState, f: &mut Frame) {
     let size = f.size();
     let node = section.child_at_path(&state.path).unwrap();
-    let child_names = node
+    let child_names: Vec<_> = node
         .children
         .iter()
-        .map(|x| Text::raw(compact_title(&x.name, size.width as usize - 3)));
+        .map(|x| ListItem::new(vec![compact_title(&x.name, size.width as usize - 3).into()]))
+        .collect();
     let selected_node = &node.children[state.get_selected()]; // FIXME: This panics
     let mut list_state = ListState::default();
     list_state.select(Some(state.get_selected()));
@@ -53,46 +55,48 @@ fn question_view(
     } else {
         text.extend(print_choices(&quiz))
     }
-    let list = Paragraph::new(text.iter())
+    let list = Paragraph::new(vec![Spans::from(text)])
         .block(titled_block(&title))
         .wrap(Wrap { trim: false });
     f.render_widget(list, size);
 }
 
-fn print_context(quiz: &QuizRef) -> Vec<Text> {
-    let style = Style::new().modifier(Modifier::ITALIC);
+fn print_context(quiz: &QuizRef) -> Vec<Span> {
+    let style = StyleDiff::default().modifier(Modifier::ITALIC);
     let path = quiz.borrow().get_context().path.join(" > ");
-    vec![Text::styled(format!("{}\n", path), style)]
+    vec![Span::styled(format!("{}\n", path), style)]
 }
 
-fn print_question(quiz: &QuizRef) -> Vec<Text> {
-    let style = Style::new().modifier(Modifier::BOLD);
-    vec![Text::styled(format!("{}\n\n", quiz.borrow().ask()), style)]
+fn print_question(quiz: &QuizRef) -> Vec<Span> {
+    let style = StyleDiff::default().modifier(Modifier::BOLD);
+    vec![Span::styled(format!("{}\n\n", quiz.borrow().ask()), style)]
 }
 
-fn print_choices(quiz: &QuizRef) -> Vec<Text> {
+fn print_choices(quiz: &QuizRef) -> Vec<Span> {
     quiz.borrow()
         .get_choices()
         .iter()
         .enumerate()
-        .map(|(i, q)| Text::raw(format!("{}) {}\n", i + 1, q)))
+        .map(|(i, q)| Span::raw(format!("{}) {}\n", i + 1, q)))
         .collect()
 }
 
-fn print_answer(correct: bool, answer: &str) -> Vec<Text> {
+fn print_answer(correct: bool, answer: &str) -> Vec<Span> {
     let answer_string = format!(", the answer is: {}", answer);
     let continue_string = "SPACE to continue";
-    let correct_style = Style::default().modifier(Modifier::BOLD).fg(Color::Green);
+    let correct_style = StyleDiff::default()
+        .modifier(Modifier::BOLD)
+        .fg(Color::Green);
     let wrong_style = correct_style.fg(Color::Red);
     if correct {
         vec![
-            Text::styled(format!("Well done{}\n", answer_string), correct_style),
-            Text::raw(format!("{}...", continue_string)),
+            Span::styled(format!("Well done{}\n", answer_string), correct_style),
+            Span::raw(format!("{}...", continue_string)),
         ]
     } else {
         vec![
-            Text::styled(format!("Sorry{}\n", answer_string), wrong_style),
-            Text::raw(format!("{}, 'o' for manual override...", continue_string)),
+            Span::styled(format!("Sorry{}\n", answer_string), wrong_style),
+            Span::raw(format!("{}, 'o' for manual override...", continue_string)),
         ]
     }
 }
@@ -127,7 +131,7 @@ fn progress_titlebar(progress: &QuizProgress, width: u16) -> String {
 
 fn titled_block(title: &str) -> Block {
     Block::default()
-        .title(&title)
+        .title(title)
         .borders(Borders::ALL)
         .border_type(BorderType::Rounded)
 }

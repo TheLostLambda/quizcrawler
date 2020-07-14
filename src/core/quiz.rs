@@ -309,7 +309,9 @@ impl Quiz for MultipleChoice {
         match self.question {
             Some(ref q) if 0 < n && n <= choices.len() => {
                 let mut q = q.borrow_mut();
-                let hints = 1.0 - self.choices.len() as f64 / self.settings.choices as f64;
+                // This ensures you don't get docked points if the section has fewer questions than settings.choices
+                let full_choices = cmp::min(self.settings.choices, self.context.siblings.len());
+                let hints = 1.0 - self.choices.len() as f64 / full_choices as f64;
                 let (correct, answer) = q.answer(&choices[n - 1], hints);
                 Some((correct, answer.to_string()))
             }
