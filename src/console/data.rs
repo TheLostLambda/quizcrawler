@@ -3,10 +3,7 @@ use crate::core::{
     quiz::{DSettings, Dispatcher, MultipleChoice, QuizProgress, QuizRef},
 };
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
-use serde::{
-    ser::{SerializeStruct, Serializer},
-    Deserialize, Serialize,
-};
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 // Trim back things that don't need to be public
@@ -14,22 +11,12 @@ use std::collections::HashMap;
 #[derive(Clone, Copy, Default, Serialize, Deserialize)]
 pub struct QCSettings {}
 
+#[derive(Serialize, Deserialize)]
 pub struct Quizcrawler {
     pub tree: Section,
     pub settings: QCSettings,
-    pub state_stack: Vec<State>,
-}
-
-impl Serialize for Quizcrawler {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut state = serializer.serialize_struct("Quizcrawler", 2)?;
-        state.serialize_field("tree", &self.tree)?;
-        state.serialize_field("settings", &self.settings)?;
-        state.end()
-    }
+    #[serde(skip)]
+    pub state_stack: Vec<State>, // FIXME: Make this a newtype and implement Default
 }
 
 #[derive(Default)]
