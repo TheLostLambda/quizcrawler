@@ -35,8 +35,6 @@ gamification of studying should further increase engagement and recall.
       - [x] Easy keyboard navigation (no return needed)
   - [ ] Persistence & Metadata
     - [ ] Save tree data / metadata
-    - [ ] Record / save quiz progress
-      - [ ] Save "sessions" (which question was I on?)
     - [x] Record how many times a question was answered correctly & incorrectly
       - [x] Have a single "mastery" number (higher -> less asked)
     - [x] Record the last time questions were asked

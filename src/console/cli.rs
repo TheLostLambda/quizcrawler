@@ -39,8 +39,8 @@ pub fn run() -> Result<(), Box<dyn Error>> {
     util::teardown_tui(tui)?;
 
     // FIXME: I shouldn't be here...
-    use super::persist::save_tree;
-    save_tree(&quizcrawler.tree);
+    use super::persist::save_state;
+    save_state(&quizcrawler);
 
     Ok(())
 }

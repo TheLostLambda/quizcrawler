@@ -25,7 +25,7 @@ version = "*"
 features = ["derive", "rc"]
 
 [dependencies.tui]
-git = "https://github.com/fdehau/tui-rs.git"
+git = "https://github.com/TheLostLambda/tui-rs.git"
 default-features = false
 features = ["crossterm"]
 

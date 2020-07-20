@@ -281,11 +281,36 @@ mod tests {
     }
 
     #[test]
+    fn mastery_unaffected_with_hints() {
+        let mut a = make_term("", "right");
+        a.answer("right", 0.25);
+        a.answer("right", 0.5);
+        a.answer("right", 0.0);
+        a.answer("wrong", 0.0);
+        a.answer("right", 0.0);
+        a.answer("wrong", 0.0);
+        assert_eq!(a.mastery, 0);
+    }
+
+    #[test]
     fn last_correct_time() {
         let mut a = make_term("", "right");
         let t1 = a.last_correct.clone();
         a.answer("wrong", 0.0);
         a.answer("wrong", 0.0);
+        let t2 = a.last_correct.clone();
+        a.answer("right", 0.0);
+        let t3 = a.last_correct.clone();
+        assert_eq!(t1, t2);
+        assert!(t3 > t2);
+    }
+
+    #[test]
+    fn last_correct_time_unchanged_with_hints() {
+        let mut a = make_term("", "right");
+        let t1 = a.last_correct.clone();
+        a.answer("wrong", 0.0);
+        a.answer("right", 0.5);
         let t2 = a.last_correct.clone();
         a.answer("right", 0.0);
         let t3 = a.last_correct.clone();
