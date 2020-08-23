@@ -6,7 +6,7 @@ use crate::core::{
 use tui::{
     style::{Color, Modifier, Style},
     symbols::line,
-    text::{Span, Spans},
+    text::Text,
     widgets::{Block, BorderType, Borders, List, ListItem, ListState, Paragraph, Wrap},
 };
 // FIXME: Good lord, this file needs some cleaning...
@@ -55,50 +55,56 @@ fn question_view(
     } else {
         text.extend(print_choices(&quiz))
     }
-    let list = Paragraph::new(vec![Spans::from(text)])
+    let list = Paragraph::new(text)
         .block(titled_block(&title))
         .wrap(Wrap { trim: false });
     f.render_widget(list, size);
 }
 
-fn print_context(quiz: &QuizRef) -> Vec<Span> {
+fn print_context(quiz: &QuizRef) -> Text {
     let style = Style::default().add_modifier(Modifier::ITALIC);
     let path = quiz.borrow().get_context().path.join(" > ");
-    vec![Span::styled(format!("{}\n", path), style)]
+    Text::styled(format!("{}\n", path), style)
 }
 
-fn print_question(quiz: &QuizRef) -> Vec<Span> {
+fn print_question(quiz: &QuizRef) -> Text {
     let style = Style::default().add_modifier(Modifier::BOLD);
-    vec![Span::styled(format!("{}\n\n", quiz.borrow().ask()), style)]
+    Text::styled(format!("{}\n\n", quiz.borrow().ask()), style)
 }
 
-fn print_choices(quiz: &QuizRef) -> Vec<Span> {
-    quiz.borrow()
-        .get_choices()
-        .iter()
-        .enumerate()
-        .map(|(i, q)| Span::raw(format!("{}) {}\n", i + 1, q)))
-        .collect()
+fn print_choices(quiz: &QuizRef) -> Text {
+    let mut choices = Text::default();
+    for (i, q) in quiz.borrow().get_choices().iter().enumerate() {
+        choices.extend(Text::raw(format!("{}) {}\n", i + 1, q)));
+    }
+    choices
 }
 
-fn print_answer(correct: bool, answer: &str) -> Vec<Span> {
+fn print_answer(correct: bool, answer: &str) -> Text {
     let answer_string = format!(", the answer is: {}", answer);
     let continue_string = "SPACE to continue";
     let correct_style = Style::default()
         .add_modifier(Modifier::BOLD)
         .fg(Color::Green);
     let wrong_style = correct_style.fg(Color::Red);
+    let mut answer = Text::default();
     if correct {
-        vec![
-            Span::styled(format!("Well done{}\n", answer_string), correct_style),
-            Span::raw(format!("{}...", continue_string)),
-        ]
+        answer.extend(Text::styled(
+            format!("Well done{}\n", answer_string),
+            correct_style,
+        ));
+        answer.extend(Text::raw(format!("{}...", continue_string)));
     } else {
-        vec![
-            Span::styled(format!("Sorry{}\n", answer_string), wrong_style),
-            Span::raw(format!("{}, 'o' for manual override...", continue_string)),
-        ]
+        answer.extend(Text::styled(
+            format!("Sorry{}\n", answer_string),
+            wrong_style,
+        ));
+        answer.extend(Text::raw(format!(
+            "{}, 'o' for manual override...",
+            continue_string
+        )));
     }
+    answer
 }
 
 fn tree_titlebar(root: &str, rest: &[String], selected: &Section, width: u16) -> String {

@@ -25,7 +25,7 @@ version = "*"
 features = ["derive", "rc"]
 
 [dependencies.tui]
-git = "https://github.com/TheLostLambda/tui-rs.git"
+path = "/home/tll/Documents/Coding/Languages/Rust/tui-rs"
 default-features = false
 features = ["crossterm"]
 
